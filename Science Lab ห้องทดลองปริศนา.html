@@ -1,0 +1,1038 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Science Lab ห้องทดลองปริศนา</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&family=Mitr:wght@500;600&display=swap">
+<style>
+/* Layout: one lab bench (a single column, max 720px) on a tiled lab wall.
+   A sticky HUD carries the test-tube rack (6 rooms), lives and score. */
+:root{
+  --wall:#e6eeeb; --tile:#d5e1dd; --bench:#fbfdfc; --bench-2:#f0f5f3;
+  --ink:#15302b; --ink-2:#4b6862; --line:#cbd9d4; --glass:#7f9f98;
+  --accent:#6b3fa3; --accent-ink:#ffffff; --accent-soft:#eee6f8;
+  --r1:#d0457b; --r2:#7d47b5; --r3:#3a6fd0; --r4:#14958f; --r5:#3c9a46; --r6:#d39b16;
+  --water:#bfe3ef; --milk:#e9eeee; --yellowliq:#f3d77a; --amber:#d9a21c; --sand:#b28a56; --oil:#f0c94a; --pinkliq:#f1a8c4; --foam:#ffffff; --chalk:#fdfefe;
+  --ok:#22804e; --ok-soft:#e0f2e7; --bad:#bd3d35; --bad-soft:#fbe5e2; --note-soft:#fff6dc;
+  --f-display:"Mitr","Anuphan","Noto Sans Thai",system-ui,sans-serif;
+  --f-body:"Anuphan","Noto Sans Thai",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --wall:#0e1a19; --tile:#162625; --bench:#152523; --bench-2:#1b2e2c;
+    --ink:#e1eeea; --ink-2:#9fb8b2; --line:#2b403d; --glass:#6f918a;
+    --accent:#b993e6; --accent-ink:#1b1027; --accent-soft:#2c2140;
+    --r1:#ef7aa6; --r2:#b48ae6; --r3:#7ea6f2; --r4:#4cc7bf; --r5:#73c97c; --r6:#efc14a;
+    --water:#3d6f80; --milk:#9fb1b0; --yellowliq:#c9a93f; --amber:#e8b93a; --sand:#c49a62; --oil:#d6b03d; --pinkliq:#b9567c; --foam:#dfe9e7; --chalk:#e9f0ef;
+    --ok:#62c98f; --ok-soft:#173527; --bad:#f08077; --bad-soft:#3a1d1b; --note-soft:#332b14;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --wall:#0e1a19; --tile:#162625; --bench:#152523; --bench-2:#1b2e2c;
+  --ink:#e1eeea; --ink-2:#9fb8b2; --line:#2b403d; --glass:#6f918a;
+  --accent:#b993e6; --accent-ink:#1b1027; --accent-soft:#2c2140;
+  --r1:#ef7aa6; --r2:#b48ae6; --r3:#7ea6f2; --r4:#4cc7bf; --r5:#73c97c; --r6:#efc14a;
+  --water:#3d6f80; --milk:#9fb1b0; --yellowliq:#c9a93f; --amber:#e8b93a; --sand:#c49a62; --oil:#d6b03d; --pinkliq:#b9567c; --foam:#dfe9e7; --chalk:#e9f0ef;
+  --ok:#62c98f; --ok-soft:#173527; --bad:#f08077; --bad-soft:#3a1d1b; --note-soft:#332b14;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{
+  background-color:var(--wall);
+  background-image:linear-gradient(var(--tile) 1px,transparent 1px),linear-gradient(90deg,var(--tile) 1px,transparent 1px);
+  background-size:44px 44px;
+  color:var(--ink); font-family:var(--f-body); font-size:16px; line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px)); padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 48px; min-height:100%;
+}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--wall)}
+#app{max-width:720px;margin:0 auto}
+h1,h2,h3{font-family:var(--f-display);font-weight:500;line-height:1.3;text-wrap:balance;margin:0}
+p{margin:0}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;padding-top:10px;margin-bottom:14px;background:linear-gradient(var(--wall) 70%,transparent)}
+.hud-in{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--bench);border:1px solid var(--line);border-radius:14px;padding:8px 14px}
+.brand{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.01em;margin-right:auto}
+@media (max-width:480px){.brand{display:none}.hud-in{justify-content:space-between;gap:10px}}
+.rack{display:flex;gap:4px;list-style:none;margin:0;padding:0}
+.rack li{width:14px;height:30px;color:var(--c)}
+.rack svg{display:block;width:14px;height:30px}
+.rack .glass{fill:none;stroke:var(--glass);stroke-width:1.4}
+.rack .fill{fill:currentColor;opacity:0}
+.rack .is-done .fill{opacity:1}
+.rack .is-now .glass{stroke:currentColor;stroke-width:2}
+.rack .is-now .fill{opacity:.28}
+.lives{display:flex;gap:3px;align-items:center}
+.life{width:9px;height:22px;border:1.6px solid var(--glass);border-top-width:0;border-radius:0 0 6px 6px;position:relative;background:linear-gradient(transparent 45%,var(--r4) 45%)}
+.life.is-broken{background:none;opacity:.35;transform:rotate(14deg)}
+.score{display:flex;align-items:baseline;gap:6px;font-size:13px;color:var(--ink-2)}
+.score b{font-family:var(--f-mono);font-size:18px;color:var(--ink);font-weight:600}
+
+/* Stage */
+.stage{background:var(--bench);border:1px solid var(--line);border-radius:16px;padding:22px 20px 20px;display:grid;gap:18px}
+.room-head{display:grid;gap:6px;padding-left:14px;border-left:4px solid var(--c)}
+.eyebrow{font-size:12.5px;letter-spacing:.06em;color:var(--ink-2);font-weight:600}
+.room-head h1{font-size:26px}
+.mission{color:var(--ink-2);max-width:62ch}
+.step-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--ink-2);border-top:1px dashed var(--line);padding-top:12px}
+.pts{font-family:var(--f-mono);font-size:12.5px;padding:2px 8px;border-radius:999px;background:var(--bench-2);border:1px solid var(--line);color:var(--ink-2)}
+.q{font-size:19px;font-weight:500;max-width:60ch}
+.ctx{display:grid;gap:10px}
+
+/* Options */
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:12px 14px;border-radius:12px;border:1.5px solid var(--line);background:var(--bench);cursor:pointer;line-height:1.5;min-height:48px}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt-k{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--bench-2);border:1px solid var(--line);font-size:13px;font-weight:600}
+.opt.is-sel{border-color:var(--accent);background:var(--accent-soft)}
+.opt.is-sel .opt-k{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.opt.is-ok{border-color:var(--ok);background:var(--ok-soft)}
+.opt.is-ok .opt-k{background:var(--ok);color:var(--bench);border-color:var(--ok)}
+.opt.is-bad{border-color:var(--bad);background:var(--bad-soft);text-decoration:line-through;text-decoration-color:var(--bad)}
+.opt:disabled{cursor:default}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft)}
+.opt[aria-pressed="true"] .opt-k{background:var(--accent);color:var(--accent-ink)}
+
+/* Equipment grid */
+.equip{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+@media (max-width:480px){.equip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.eq{display:grid;justify-items:center;gap:4px;padding:12px 6px 10px;border-radius:12px;border:1.5px solid var(--line);background:var(--bench);cursor:pointer;color:var(--ink)}
+.eq:hover:not(:disabled){border-color:var(--accent)}
+.eq svg{width:52px;height:52px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.eq .ic-liq{fill:var(--water);stroke:none}
+.eq .ic-merc{stroke:var(--bad);stroke-width:3}
+.eq .ic-fill{fill:var(--bad);stroke:none}
+.eq span{font-size:14.5px;font-weight:500}
+.eq.is-sel{border-color:var(--accent);background:var(--accent-soft)}
+.eq.is-ok{border-color:var(--ok);background:var(--ok-soft)}
+.eq.is-bad{border-color:var(--bad);background:var(--bad-soft);opacity:.7}
+
+/* Notebook clue */
+.note{border:1px solid var(--line);border-radius:12px;background:var(--note-soft);padding:12px 16px 12px 44px;position:relative;background-image:repeating-linear-gradient(transparent 0 27px,var(--line) 27px 28px);background-position:0 10px;line-height:28px}
+.note::before{content:"";position:absolute;left:28px;top:0;bottom:0;border-left:2px solid var(--r1);opacity:.5}
+.note h3{font-size:14px;font-family:var(--f-body);font-weight:600;color:var(--ink-2);line-height:28px}
+.note p{font-size:15px}
+.note .pg{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);margin-right:6px}
+
+/* Data table */
+.tbl-wrap{overflow-x:auto}
+table.data{border-collapse:collapse;width:100%;font-size:15px;font-variant-numeric:tabular-nums}
+table.data th,table.data td{border:1px solid var(--line);padding:8px 10px;text-align:left}
+table.data th{background:var(--bench-2);font-weight:600;font-size:14px;white-space:nowrap}
+table.data td:first-child{white-space:nowrap}
+#sentence{font-family:var(--f-body);font-size:14.5px;line-height:1.6;min-height:130px}
+table.data td.num{font-family:var(--f-mono);text-align:right}
+table.data tr.row-bad td{background:var(--bad-soft)}
+table.data tr.row-ok td{background:var(--ok-soft)}
+table.data select{font:inherit;padding:6px 8px;border-radius:8px;border:1.5px solid var(--line);background:var(--bench);color:var(--ink);width:100%;min-width:9em}
+
+/* Sorting cards */
+.samples{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (max-width:560px){.samples{grid-template-columns:minmax(0,1fr)}}
+.sample{display:grid;grid-template-columns:56px minmax(0,1fr);gap:4px 12px;padding:12px;border:1.5px solid var(--line);border-radius:12px;background:var(--bench)}
+.sample.is-bad{border-color:var(--bad);background:var(--bad-soft)}
+.sample.is-ok{border-color:var(--ok)}
+.sample svg{grid-row:span 2;width:56px;height:60px}
+.sample b{font-weight:600}
+.sample .obs{font-size:14px;color:var(--ink-2);line-height:1.5}
+.seg{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:6px}
+.seg button{padding:8px;border-radius:9px;border:1.5px solid var(--line);background:var(--bench-2);cursor:pointer;font-size:14px;min-height:40px}
+.seg button[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.seg button:disabled{cursor:default}
+.why{grid-column:1/-1;font-size:13.5px;color:var(--bad)}
+
+/* Ordering */
+.order{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:560px){.order{grid-template-columns:minmax(0,1fr)}}
+.order h3{font-size:14px;font-family:var(--f-body);font-weight:600;color:var(--ink-2);margin-bottom:6px}
+.order ol{margin:0;padding:0;list-style:none;display:grid;gap:6px;counter-reset:s}
+.order ol li{counter-increment:s;display:flex;gap:10px;padding:9px 12px;border-radius:10px;background:var(--accent-soft);border:1.5px solid var(--accent);font-size:15px;line-height:1.45}
+.order ol li::before{content:counter(s);font-family:var(--f-mono);font-weight:600;color:var(--accent)}
+.order ol.is-bad li{background:var(--bad-soft);border-color:var(--bad)}
+.order ol.is-ok li{background:var(--ok-soft);border-color:var(--ok)}
+.order .empty{font-size:14px;color:var(--ink-2);padding:10px;border:1.5px dashed var(--line);border-radius:10px}
+.pool{display:grid;gap:6px}
+.pool .opt{min-height:44px;font-size:15px;padding:9px 12px}
+
+/* Scene */
+.scene-box{display:grid;justify-items:center;gap:10px;background:var(--bench-2);border:1px solid var(--line);border-radius:14px;padding:14px}
+.scene{width:100%;max-width:360px;height:auto}
+.scene .glass{fill:none;stroke:var(--glass);stroke-width:2.4;stroke-linejoin:round}
+.scene .tick{stroke:var(--glass);stroke-width:1.2}
+.scene .lbl{font-family:var(--f-body);font-size:12.5px;fill:var(--ink-2)}
+.scene .read{font-family:var(--f-mono);font-size:14px;font-weight:600;fill:var(--ink)}
+.scene .tlbl{font-family:var(--f-mono);font-size:9px;fill:var(--ink-2)}
+.scene .liq{fill:var(--liq-from);transform-box:fill-box;transform-origin:50% 100%}
+.scene.go .liq,.scene.done .liq{fill:var(--liq-to)}
+.scene.go .liq{transition:fill 1.6s ease .9s,transform 1s ease .2s}
+.scene .bub{fill:var(--foam);stroke:var(--glass);stroke-width:.8;opacity:0;transform-box:fill-box}
+.scene.go .bub{animation:rise 1.2s ease-in infinite;animation-delay:var(--d)}
+@keyframes rise{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(-62px);opacity:0}}
+.scene .foam{transform-box:fill-box;transform-origin:50% 100%;transform:scaleY(0)}
+.scene.go .foam{transition:transform 1.4s ease-out .7s}
+.scene.go .foam,.scene.done .foam{transform:scaleY(1)}
+.scene .powder{transform-box:fill-box}
+.scene.go .powder,.scene.done .powder{transform:translateY(64px);opacity:0}
+.scene.go .powder{transition:transform .7s ease-in,opacity .3s ease .55s}
+.scene .drop{fill:var(--water);stroke:var(--glass);stroke-width:.8;opacity:0;transform-box:fill-box}
+.scene.go .drop{animation:drip .55s ease-in 3;animation-delay:var(--d)}
+@keyframes drip{0%{opacity:1;transform:translateY(0)}100%{opacity:1;transform:translateY(58px)}}
+.scene .pp{opacity:0;transform:translateY(-46px);transform-box:fill-box}
+.scene.go .pp{transition:opacity .8s ease 1.9s,transform 1.4s ease-in 1.9s}
+.scene.go .pp,.scene.done .pp{opacity:1;transform:translateY(0)}
+.scene .src{transform-box:fill-box;transform-origin:50% 100%}
+.scene.go .src,.scene.done .src{transform:scaleY(0)}
+.scene.go .src{transition:transform .9s ease .2s}
+.scene.xy .liq{transform:scaleY(0)}
+.scene.xy.go .liq,.scene.xy.done .liq{transform:scaleY(1)}
+.scene .merc{fill:var(--bad)}
+.obs-list{display:grid;gap:6px;margin:0;padding:0;list-style:none;width:100%}
+.obs-list li{display:flex;gap:10px;align-items:baseline;padding:8px 12px;border-radius:10px;background:var(--bench);border:1px solid var(--line);font-size:15px}
+.obs-list li::before{content:"";flex:none;width:8px;height:8px;border-radius:50%;background:var(--c,var(--accent));transform:translateY(-1px)}
+
+/* Feedback */
+.fb{border-radius:12px;padding:14px 16px;display:grid;gap:8px;border:1.5px solid}
+.fb.ok{border-color:var(--ok);background:var(--ok-soft)}
+.fb.bad{border-color:var(--bad);background:var(--bad-soft)}
+.fb.reveal{border-color:var(--amber);background:var(--note-soft)}
+.fb.note{border-color:var(--accent);background:var(--accent-soft)}
+.fb h3{font-family:var(--f-body);font-weight:600;font-size:16px}
+.fb dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0;font-size:15px}
+.fb dt{font-weight:600;color:var(--ink-2);font-size:13.5px;padding-top:1px}
+.fb dd{margin:0}
+.fb ul{margin:0;padding-left:18px;font-size:15px;display:grid;gap:4px}
+.hints{display:grid;gap:6px}
+.hint{font-size:15px;padding:10px 14px;border-radius:10px;background:var(--note-soft);border:1px dashed var(--amber)}
+.hint b{font-family:var(--f-mono);font-size:12px;color:var(--ink-2);margin-right:6px}
+
+/* Actions */
+.actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.btn{border:0;border-radius:12px;padding:12px 20px;font-weight:600;font-size:16px;cursor:pointer;min-height:48px;font-family:var(--f-display);letter-spacing:.01em}
+.btn-primary{background:var(--accent);color:var(--accent-ink)}
+.btn-primary:hover{filter:brightness(1.07)}
+.btn-ghost{background:var(--bench);border:1.5px solid var(--line);color:var(--ink)}
+.btn-ghost:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.link{background:none;border:0;color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer;padding:6px 2px;font-size:15px}
+
+/* Start */
+.start{display:grid;gap:22px;padding-top:28px}
+.hero{background:var(--bench);border:1px solid var(--line);border-radius:18px;padding:24px 22px;display:grid;gap:14px;overflow:hidden}
+.hero-rack{width:100%;max-width:420px;height:auto}
+.hero h1{font-size:clamp(34px,8vw,52px);font-weight:600;letter-spacing:-.01em;line-height:1.05}
+.hero h1 small{display:block;font-size:.5em;font-weight:500;color:var(--accent);margin-top:6px;letter-spacing:0}
+.hero p{max-width:60ch;color:var(--ink-2)}
+.rules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0;padding:0;list-style:none}
+@media (max-width:520px){.rules{grid-template-columns:minmax(0,1fr)}}
+.rules li{padding:10px 12px;border-radius:12px;background:var(--bench-2);border:1px solid var(--line);font-size:14.5px;line-height:1.5}
+.rules b{display:block;font-family:var(--f-display);font-weight:500;font-size:15px}
+.form{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}
+@media (max-width:520px){.form{grid-template-columns:1fr 1fr}.form .f-name{grid-column:1/-1}}
+.field{display:grid;gap:4px;min-width:0}
+.field label{font-size:13px;font-weight:600;color:var(--ink-2)}
+.field input,.field textarea{font:inherit;padding:10px 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--bench);color:var(--ink);width:100%;min-width:0}
+.field textarea{font-family:var(--f-mono);font-size:14px;min-height:150px;resize:vertical}
+
+/* Room done / door / result */
+.digit{font-family:var(--f-mono);font-size:44px;font-weight:600;width:72px;height:88px;display:grid;place-items:center;border-radius:14px;background:var(--bench-2);border:2px solid var(--c,var(--accent));color:var(--ink)}
+.pieces{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}
+.piece{display:grid;justify-items:center;gap:2px;padding:8px 0;border-radius:10px;border:1.5px solid var(--line);background:var(--bench-2)}
+.piece .d{font-family:var(--f-mono);font-size:24px;font-weight:600;color:var(--c)}
+.piece small{font-size:11.5px;color:var(--ink-2)}
+.piece.is-empty .d{color:var(--line)}
+.code-display{display:flex;justify-content:center;gap:8px}
+.code-display span{width:44px;height:56px;border-radius:10px;border:1.5px solid var(--line);display:grid;place-items:center;font-family:var(--f-mono);font-size:26px;font-weight:600;background:var(--bench)}
+.keypad{display:grid;grid-template-columns:repeat(3,minmax(0,72px));gap:8px;justify-content:center}
+.keypad button{height:56px;border-radius:12px;border:1.5px solid var(--line);background:var(--bench);font-family:var(--f-mono);font-size:22px;font-weight:600;cursor:pointer}
+.keypad button:hover{border-color:var(--accent)}
+.msg-bad{color:var(--bad);text-align:center;font-weight:500}
+.big-score{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.big-score b{font-family:var(--f-mono);font-size:64px;font-weight:600;line-height:1}
+.big-score span{font-family:var(--f-mono);font-size:20px;color:var(--ink-2)}
+.rank{display:inline-block;padding:6px 14px;border-radius:999px;background:var(--accent);color:var(--accent-ink);font-family:var(--f-display);font-weight:500}
+.bars{display:grid;gap:10px}
+.bar-row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 5.2em;gap:10px;align-items:center;font-size:14.5px}
+.bar{height:12px;border-radius:6px;background:var(--bench-2);border:1px solid var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--c,var(--accent));border-radius:6px}
+.bar-row .v{font-family:var(--f-mono);text-align:right;font-size:13.5px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+@media (max-width:520px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{padding:10px 12px;border-radius:12px;background:var(--bench-2);border:1px solid var(--line)}
+.stat small{display:block;font-size:12.5px;color:var(--ink-2)}
+.stat b{font-family:var(--f-mono);font-size:20px;font-weight:600}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:20;max-width:min(560px,calc(100% - 32px));background:var(--ink);color:var(--bench);padding:12px 16px;border-radius:12px;font-size:15px;box-shadow:0 6px 24px rgb(0 0 0 / .25)}
+.section-title{font-size:20px}
+.muted{color:var(--ink-2);font-size:14.5px}
+.copybox{width:100%;font-family:var(--f-mono);font-size:12.5px;min-height:110px;padding:10px;border-radius:10px;border:1.5px solid var(--line);background:var(--bench);color:var(--ink)}
+.banner{padding:10px 14px;border-radius:10px;background:var(--note-soft);border:1px dashed var(--amber);font-size:14.5px}
+.confirm{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:10px 14px;border-radius:10px;background:var(--bad-soft);border:1px solid var(--bad);font-size:14.5px}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div id="app" aria-live="polite"></div>
+
+<script>
+(() => {
+'use strict';
+const app = document.getElementById('app');
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const KEY = 'scienceLab.history.v1';
+
+const SKILLS = [
+  {k:'equip', name:'การเลือกอุปกรณ์', max:15, c:'--r1'},
+  {k:'classify', name:'การจำแนก', max:15, c:'--r2'},
+  {k:'hypo', name:'การตั้งสมมติฐาน', max:15, c:'--r3'},
+  {k:'exper', name:'การทดลอง', max:15, c:'--r3'},
+  {k:'observe', name:'การสังเกตและบันทึก', max:15, c:'--r4'},
+  {k:'analyze', name:'การวิเคราะห์ข้อมูล', max:15, c:'--r5'},
+  {k:'conclude', name:'การสรุปผล', max:10, c:'--r6'},
+];
+
+const EQUIP = {
+  beaker:{name:'บีกเกอร์', use:'ใส่และผสมสารปริมาณมาก ขีดบอกปริมาตรเป็นเพียงค่าประมาณ'},
+  tube:{name:'หลอดทดลอง', use:'ใส่สารปริมาณน้อยเพื่อทดลองหรือสังเกต ไม่มีขีดบอกปริมาตร'},
+  cylinder:{name:'กระบอกตวง', use:'ตวงปริมาตรของเหลว มีขีดบอกปริมาตรละเอียดเป็นมิลลิลิตร (mL)'},
+  dropper:{name:'หลอดหยด', use:'ดูดและหยดของเหลวทีละน้อย'},
+  scale:{name:'เครื่องชั่ง', use:'ชั่งมวลของสาร มีหน่วยเป็นกรัม (g)'},
+  thermo:{name:'เทอร์โมมิเตอร์', use:'วัดอุณหภูมิ มีหน่วยเป็นองศาเซลเซียส (°C)'},
+};
+const ICON = {
+  beaker:'<path d="M10 9h28M13 9v27a4 4 0 0 0 4 4h14a4 4 0 0 0 4-4V9"/><path class="ic-liq" d="M14 25h20v11a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3z"/><path d="M29 15h4M29 20h4M29 25h4"/>',
+  tube:'<path d="M18 5h12M20 5v31a4 4 0 0 0 8 0V5"/><path class="ic-liq" d="M20.9 24h6.2v12a3.1 3.1 0 0 1-6.2 0z"/>',
+  cylinder:'<path d="M17 5h14M19 5v34M29 5v34M13 39h22v4H13z"/><path class="ic-liq" d="M19.9 21h8.2v18h-8.2z"/><path d="M29 10h-3M29 14h-3M29 18h-3M29 22h-3M29 26h-3M29 30h-3M29 34h-3"/>',
+  dropper:'<path d="M24 4c-3 0-5 2.2-5 5v6h10V9c0-2.8-2-5-5-5z"/><path d="M20 15h8v4h-8z"/><path d="M22 19h4v17l-2 5-2-5z"/><path class="ic-liq" d="M22.6 30h2.8v6l-1.4 3.4-1.4-3.4z"/>',
+  scale:'<path d="M9 23h30l-3 5H12z"/><rect x="7" y="28" width="34" height="13" rx="3"/><rect x="13" y="32" width="15" height="5" rx="1"/><circle cx="34" cy="34.5" r="1.6"/>',
+  thermo:'<path d="M21 8a3 3 0 0 1 6 0v23.5a6.5 6.5 0 1 1-6 0z"/><circle class="ic-fill" cx="24" cy="37" r="3.6"/><path class="ic-merc" d="M24 34V18"/><path d="M27 13h3M27 18h3M27 23h3"/>',
+};
+
+const NB1 = `<div class="note"><h3>สมุดบันทึกของนักวิทยาศาสตร์คนก่อน</h3><p><span class="pg">หน้า 12</span>หยดน้ำมะนาวลงบนผงฟู มีฟองฟู่เกิดขึ้นทันที</p><p><span class="pg">หน้า 13</span>น้ำมะนาวและน้ำส้มสายชูมีรสเปรี้ยวเหมือนกัน</p></div>`;
+const NB2 = `<div class="note"><h3>สมุดบันทึกของนักวิทยาศาสตร์คนก่อน</h3><p><span class="pg">หน้า 20</span>เป่าลมหายใจลงในน้ำปูนใส น้ำปูนใสขุ่นขาว</p><p><span class="pg">หน้า 21</span>ลมหายใจออกมีแก๊สคาร์บอนไดออกไซด์</p><p><span class="pg">ฉลากขวด</span>น้ำโซดา คือ น้ำที่อัดแก๊สคาร์บอนไดออกไซด์</p></div>`;
+const T5 = `<div class="tbl-wrap"><table class="data"><caption class="muted" style="caption-side:top;text-align:left;padding-bottom:6px">หน้าที่เหลืออยู่: ผสมสาร A กับสาร B</caption><thead><tr><th>การทดลอง</th><th>อุณหภูมิก่อนผสม (°C)</th><th>อุณหภูมิหลังผสม (°C)</th></tr></thead><tbody><tr><td>ครั้งที่ 1</td><td class="num">25</td><td class="num">30</td></tr><tr><td>ครั้งที่ 2</td><td class="num">25</td><td class="num">31</td></tr><tr><td>ครั้งที่ 3</td><td class="num">25</td><td class="num">30</td></tr></tbody></table></div>`;
+const CHART5 = (() => {
+  const vals = [2,4,null,8], X = i => 70 + i*72, Y = v => 170 - v*17;
+  let s = `<svg viewBox="0 0 360 214" class="scene" role="img" aria-label="กราฟความสูงฟองเมื่อเพิ่มผงฟู 1 ถึง 4 ช้อน ค่าที่ 3 ช้อนหายไป">`;
+  for (let v=0; v<=8; v+=2) s += `<line x1="44" x2="340" y1="${Y(v)}" y2="${Y(v)}" class="tick" opacity=".45"/><text x="36" y="${Y(v)+4}" text-anchor="end" class="tlbl">${v}</text>`;
+  vals.forEach((v,i) => {
+    s += v == null
+      ? `<rect x="${X(i)-20}" y="${Y(9)}" width="40" height="${170-Y(9)}" rx="4" fill="none" stroke="var(--ink-2)" stroke-dasharray="5 4"/><text x="${X(i)}" y="${Y(4.5)}" text-anchor="middle" class="read">?</text>`
+      : `<rect x="${X(i)-20}" y="${Y(v)}" width="40" height="${170-Y(v)}" rx="4" fill="var(--r5)"/><text x="${X(i)}" y="${Y(v)-6}" text-anchor="middle" class="tlbl" style="font-size:11px">${v} cm</text>`;
+    s += `<text x="${X(i)}" y="188" text-anchor="middle" class="lbl">${i+1} ช้อน</text>`;
+  });
+  s += `<line x1="44" x2="340" y1="170" y2="170" stroke="var(--glass)"/><text x="190" y="208" text-anchor="middle" class="lbl">ปริมาณผงฟู (ช้อนชา) ในน้ำส้มสายชู 20 mL เท่ากันทุกครั้ง</text><text x="12" y="16" class="lbl">ความสูงฟอง (cm)</text></svg>`;
+  return `<div class="scene-box">${s}</div>`;
+})();
+const RECAP4 = `<div class="tbl-wrap"><table class="data"><caption class="muted" style="caption-side:top;text-align:left;padding-bottom:6px">ผลจากห้องสังเกตการณ์: สาร X + สาร Y</caption><thead><tr><th>สิ่งที่สังเกต</th><th>ก่อนผสม</th><th>หลังผสม</th></tr></thead><tbody><tr><td>สี</td><td>ใส ไม่มีสี</td><td>สีเหลือง</td></tr><tr><td>สถานะ</td><td>ของเหลว</td><td>ของเหลว</td></tr><tr><td>ตะกอน</td><td>ไม่มี</td><td>มี</td></tr><tr><td>ฟองแก๊ส</td><td>ไม่มี</td><td>ไม่มี</td></tr><tr><td>อุณหภูมิ</td><td class="num">25 °C</td><td class="num">25 °C</td></tr></tbody></table></div>`;
+
+const SCENES = {
+  vinegar:{vessel:'beaker', from:'var(--water)', to:'var(--water)', powder:true, bubbles:true, foam:true, t0:25, t1:22, label:'น้ำส้มสายชู + ผงฟู'},
+  lime:{vessel:'tube', from:'var(--water)', to:'var(--milk)', drops:true, precip:'var(--chalk)', t0:25, t1:25, label:'น้ำปูนใส + น้ำโซดา'},
+  xy:{vessel:'tube', from:'var(--water)', to:'var(--yellowliq)', srcs:true, precip:'var(--amber)', t0:25, t1:25, label:'สาร X + สาร Y'},
+};
+
+const ROOMS = [
+ {name:'ห้องอุปกรณ์ทดลอง', skill:'การเลือกและตัดสินใจ', digit:3, c:'--r1',
+  mission:'โต๊ะอุปกรณ์ถูกรื้อกระจัดกระจาย หยิบอุปกรณ์ให้ตรงกับงานแต่ละชิ้น',
+  steps:[
+   {type:'equip', skill:'equip', pts:5, q:'นักวิทยาศาสตร์ต้องการวัดอุณหภูมิของสารหลังจากผสมสาร A และ B ควรเลือกอุปกรณ์ใด?', ans:'thermo', need:'วัดอุณหภูมิ', ev:'โจทย์ต้องการค่าอุณหภูมิ ซึ่งมีหน่วยเป็นองศาเซลเซียส (°C)', hints:['ลองนึกว่า “อุณหภูมิ” มีหน่วยเป็นอะไร แล้วอุปกรณ์ใดแสดงหน่วยนั้น','อุปกรณ์นี้มีกระเปาะที่ปลาย และมีขีดบอกค่าเป็นองศาเซลเซียส']},
+   {type:'equip', skill:'equip', pts:5, q:'ต้องการตวงน้ำกลั่น 20 mL ให้ได้ปริมาตรแม่นยำ ควรเลือกอุปกรณ์ใด?', ans:'cylinder', need:'ตวงปริมาตร 20 mL ให้แม่นยำ', ev:'โจทย์ระบุหน่วย mL และต้องการความแม่นยำ', hints:['ลองพิจารณาว่าอุปกรณ์ใดมีหน่วย mL และมีขีดบอกค่าละเอียด','อุปกรณ์ชนิดนี้ทรงสูง แคบ ใช้สำหรับวัดปริมาตรของเหลว']},
+   {type:'equip', skill:'equip', pts:5, q:'สูตรการทดลองต้องใช้เกลือ 5 กรัม ควรใช้อุปกรณ์ใดเพื่อให้ได้ปริมาณที่ถูกต้อง?', ans:'scale', need:'หาปริมาณเกลือเป็นกรัม (มวล)', ev:'“กรัม” เป็นหน่วยของมวล ไม่ใช่ปริมาตรหรืออุณหภูมิ', hints:['“กรัม” เป็นหน่วยของอะไร ปริมาตร มวล หรืออุณหภูมิ?','อุปกรณ์นี้มีจานวางสาร และแสดงตัวเลขเป็นกรัม (g)']},
+  ]},
+ {name:'ห้องจำแนกสาร', skill:'การจำแนกและเปรียบเทียบ', digit:7, c:'--r2',
+  mission:'ภารกิจสารปริศนา: ตัวอย่างสาร 6 ชนิดถูกใส่น้ำและคนไว้แล้ว แต่ป้ายกลุ่มหลุดหาย จัดกลุ่มใหม่จากผลการสังเกต',
+  steps:[
+   {type:'sort', skill:'classify', pts:9, q:'อ่านผลการสังเกตของแต่ละสาร แล้วเลือกว่าสารนั้น “ละลายน้ำ” หรือ “ไม่ละลายน้ำ”', bins:['ละลายน้ำ','ไม่ละลายน้ำ'],
+    items:[
+     {n:'เกลือป่น', kind:'clear', obs:'คนแล้วมองไม่เห็นผงเกลือ น้ำใส ตั้งทิ้งไว้ 5 นาทีไม่มีตะกอน', ans:0, why:'มองไม่เห็นเนื้อเกลือและไม่มีตะกอน แสดงว่าเกลือละลายน้ำ'},
+     {n:'ทราย', kind:'sand', obs:'ตั้งทิ้งไว้ 5 นาที เม็ดทรายจมอยู่ที่ก้นแก้ว น้ำด้านบนใส', ans:1, why:'ทรายจมเป็นตะกอนที่ก้นแก้ว แสดงว่าทรายไม่ละลายน้ำ'},
+     {n:'น้ำตาลทราย', kind:'clear', obs:'คนแล้วเม็ดน้ำตาลหายไป น้ำใส ไม่มีตะกอน', ans:0, why:'เม็ดน้ำตาลหายไปและไม่มีตะกอน แสดงว่าน้ำตาลละลายน้ำ'},
+     {n:'น้ำมันพืช', kind:'oil', obs:'แยกเป็น 2 ชั้น ชั้นน้ำมันสีเหลืองลอยอยู่ด้านบน', ans:1, why:'น้ำมันแยกชั้นลอยอยู่ด้านบน แสดงว่าไม่ละลายน้ำ'},
+     {n:'สีผสมอาหาร', kind:'color', obs:'น้ำทั้งแก้วเป็นสีชมพูเท่ากัน ใส มองทะลุได้ ไม่มีตะกอน', ans:0, why:'สีกระจายทั่วแก้วเท่ากัน ใสและไม่มีตะกอน แสดงว่าละลายน้ำ'},
+     {n:'ผงชอล์ก', kind:'chalk', obs:'น้ำขุ่นขาว ตั้งทิ้งไว้มีผงสีขาวตกตะกอนที่ก้นแก้ว', ans:1, why:'น้ำขุ่นและมีผงตกตะกอน แสดงว่าผงชอล์กไม่ละลายน้ำ'},
+    ],
+    ok:'สารที่ละลายน้ำจะกระจายเป็นเนื้อเดียวกับน้ำ มองไม่เห็นเนื้อสาร และไม่มีตะกอน', ev:'ผลการสังเกตหลังตั้งทิ้งไว้ 5 นาทีของสารแต่ละชนิด',
+    hints:['ถ้ามองไม่เห็นเนื้อสาร และไม่มีตะกอน แปลว่าอะไร?','สารที่ไม่ละลายน้ำจะเห็นแยกออกมา เช่น จมเป็นตะกอน ลอยเป็นชั้น หรือทำให้น้ำขุ่น']},
+   {type:'choice', skill:'classify', pts:6, q:'ห้องแล็บแบ่งของเหลวเป็น 2 กลุ่มตามข้อมูลนี้ ใช้เกณฑ์ใดในการจัดกลุ่ม?',
+    ctx:`<div class="tbl-wrap"><table class="data"><thead><tr><th>กลุ่ม ก</th><th>กลุ่ม ข</th></tr></thead><tbody><tr><td>น้ำเกลือ</td><td>น้ำโคลน</td></tr><tr><td>น้ำเชื่อม</td><td>น้ำผสมผงชอล์ก</td></tr><tr><td>น้ำผสมสีผสมอาหาร</td><td>น้ำมันพืชกับน้ำ</td></tr></tbody></table></div>`,
+    opts:[
+     {t:'สีของของเหลว', why:'กลุ่ม ก มีทั้งของเหลวไม่มีสีและสีชมพู กลุ่ม ข ก็มีหลายสี สีจึงแบ่งสองกลุ่มนี้ไม่ได้'},
+     {t:'สถานะของสาร', why:'ทุกอย่างเป็นของเหลวเหมือนกัน สถานะจึงแบ่งกลุ่มไม่ได้'},
+     {t:'สารที่ผสมอยู่ละลายน้ำได้หรือไม่ (เป็นสารละลายหรือไม่)'},
+     {t:'กลิ่นของสาร', why:'ไม่มีข้อมูลเรื่องกลิ่นเลย เกณฑ์ต้องมาจากข้อมูลที่มี'},
+    ], ans:2, ok:'กลุ่ม ก เป็นสารละลาย สารที่ผสมละลายน้ำ เนื้อเดียวกัน ไม่มีตะกอน ส่วนกลุ่ม ข ไม่เป็นสารละลาย', ev:'เกลือ น้ำตาล และสีผสมอาหารละลายน้ำ ส่วนดินโคลน ผงชอล์ก และน้ำมันไม่ละลายน้ำ (จากข้อที่แล้ว)',
+    hints:['เกณฑ์ที่ดีต้องทำให้ทุกสารในกลุ่ม ก เหมือนกัน และต่างจากกลุ่ม ข','นึกถึงผลการจัดกลุ่มข้อที่แล้ว เกลือ น้ำตาล และสีผสมอาหารอยู่กลุ่มใด']},
+  ]},
+ {name:'ห้องทดลองผสมสาร', skill:'การตั้งสมมติฐานและการทดลอง', digit:2, c:'--r3',
+  mission:'ภารกิจหลัก: ทำการทดลอง 2 การทดลอง คาดการณ์ก่อนทุกครั้ง แล้วพิสูจน์ด้วยการทดลองจริง',
+  steps:[
+   {type:'choice', skill:'exper', pts:5, tag:'การทดลองที่ 1 · น้ำส้มสายชู + ผงฟู', q:'ต้องการตวงน้ำส้มสายชู 10 mL ใส่ภาชนะ แล้วเติมผงฟู 1 ช้อนชา ควรใช้อุปกรณ์ชุดใด?',
+    opts:[
+     {t:'บีกเกอร์อย่างเดียว', why:'ขีดบนบีกเกอร์เป็นค่าประมาณ ตวง 10 mL ได้ไม่แม่นยำ และไม่มีอุปกรณ์ตักผงฟู'},
+     {t:'กระบอกตวง + บีกเกอร์ + ช้อนตักสาร'},
+     {t:'เทอร์โมมิเตอร์ + เครื่องชั่ง', why:'ทั้งสองใช้วัดอุณหภูมิและมวล ไม่มีอุปกรณ์ตวงของเหลวและภาชนะสำหรับผสม'},
+     {t:'หลอดหยด + หลอดทดลอง', why:'หยดทีละหยดจนครบ 10 mL ใช้เวลานานและนับปริมาตรได้ไม่แม่นยำ'},
+    ], ans:1, ok:'กระบอกตวงตวง 10 mL ได้แม่นยำ บีกเกอร์ใหญ่พอให้ฟองขยายตัว และช้อนตักสารใช้ตักผงฟู', ev:'โจทย์มี 3 งาน: ตวงของเหลว 10 mL ใส่ภาชนะ และเติมสารที่เป็นผง',
+    hints:['ชุดที่ถูกต้องต้องทำได้ครบ 3 งาน: ตวงของเหลว ใส่ภาชนะ และตักผง','อุปกรณ์ที่ตวง mL ได้แม่นยำคือกระบอกตวง']},
+   {type:'predict', skill:'hypo', pts:5, tag:'การทดลองที่ 1 · คาดการณ์ก่อนทดลอง', ctx:NB1, q:'ฉันคาดว่า เมื่อเติมผงฟูลงในน้ำส้มสายชู สิ่งที่สังเกตเห็นได้ชัดที่สุดคือ…',
+    opts:[{t:'ไม่มีการเปลี่ยนแปลง'},{t:'สีเปลี่ยน'},{t:'เกิดฟองแก๊ส'},{t:'เกิดตะกอน'}], ans:2, result:'เกิดฟองแก๊สฟู่ขึ้นทันที',
+    hints:['อ่านสมุดบันทึกหน้า 12 และ 13 แล้วเปรียบเทียบน้ำมะนาวกับน้ำส้มสายชู','ถ้าสารสองชนิดมีสมบัติคล้ายกัน ผลที่เกิดกับผงฟูก็น่าจะคล้ายกัน']},
+   {type:'run', scene:'vinegar', tag:'การทดลองที่ 1 · โต๊ะทดลอง', q:'เทผงฟูลงในน้ำส้มสายชู แล้วสังเกตให้ดี', obs:['เกิดฟองแก๊สฟู่ขึ้นทันทีและล้นขึ้นมาเป็นโฟม','เทอร์โมมิเตอร์ลดลงจาก 25 °C เป็น 22 °C','สีไม่เปลี่ยน ไม่มีตะกอน']},
+   {type:'match', tag:'การทดลองที่ 1 · ตรวจสอบการคาดการณ์', q:'ผลที่เกิดขึ้นตรงกับที่คาดการณ์หรือไม่?'},
+   {type:'choice', skill:'hypo', pts:5, tag:'การทดลองที่ 1 · อธิบายผล', q:'เพราะเหตุใดจึงเกิดผลดังกล่าว?',
+    opts:[
+     {t:'น้ำส้มสายชูทำปฏิกิริยากับผงฟู เกิดสารใหม่คือแก๊สคาร์บอนไดออกไซด์ จึงเห็นฟอง'},
+     {t:'ผงฟูละลายน้ำได้เหมือนน้ำตาล ฟองคืออากาศที่ติดมากับผง', why:'น้ำตาลละลายน้ำโดยไม่เกิดฟอง ฟองจำนวนมากที่เกิดต่อเนื่องจึงไม่ใช่แค่การละลาย'},
+     {t:'น้ำส้มสายชูเดือดเพราะร้อนขึ้น', why:'เทอร์โมมิเตอร์บอกว่าอุณหภูมิลดลงจาก 25 °C เป็น 22 °C จึงไม่ใช่การเดือด'},
+     {t:'ฟองเกิดจากการคนแรงเกินไป', why:'การทดลองนี้ไม่ได้คน ฟองเกิดทันทีที่ผงฟูสัมผัสน้ำส้มสายชู'},
+    ], ans:0, ok:'ฟองแก๊สที่เกิดขึ้นเอง และอุณหภูมิที่เปลี่ยนไป เป็นหลักฐานว่ามีสารใหม่เกิดขึ้น (การเปลี่ยนแปลงทางเคมี)', ev:'ผลที่สังเกตได้: ฟองแก๊สเกิดทันที และอุณหภูมิลดลง 3 °C',
+    hints:['ดูค่าบนเทอร์โมมิเตอร์ก่อนและหลังทดลอง ตัดตัวเลือกที่ขัดกับตัวเลขนี้ออก','ฟองแก๊สที่เกิดขึ้นเองเมื่อผสมสาร เป็นสัญญาณของการเกิดสารใหม่']},
+   {type:'order', skill:'exper', pts:5, tag:'การทดลองที่ 2 · น้ำปูนใส + น้ำโซดา', q:'ก่อนทดลอง ช่วยเรียงขั้นตอนการทดลองให้ถูกต้อง (แตะตามลำดับ)',
+    steps:['ตวงน้ำปูนใส 10 mL ด้วยกระบอกตวง แล้วเทใส่หลอดทดลอง','สังเกตและบันทึกลักษณะของน้ำปูนใสก่อนผสม','ใช้หลอดหยดเติมน้ำโซดาลงไป 10 หยด','เขย่าเบา ๆ แล้วสังเกตและบันทึกผลหลังผสม'], show:[2,0,3,1],
+    ok:'ลำดับนี้ทำให้มีข้อมูลทั้งก่อนและหลังผสมสำหรับเปรียบเทียบ', ev:'การจะบอกว่าอะไรเปลี่ยนไป ต้องมีบันทึก “ก่อน” เทียบกับ “หลัง”',
+    hints:['ต้องบันทึกสภาพ “ก่อน” ผสมไว้ก่อน จึงจะเปรียบเทียบกับ “หลัง” ผสมได้','เริ่มจากเตรียมสารให้มีปริมาณแน่นอน และจบด้วยการบันทึกผล']},
+   {type:'predict', skill:'hypo', pts:5, tag:'การทดลองที่ 2 · คาดการณ์ก่อนทดลอง', ctx:NB2, q:'ฉันคาดว่า เมื่อหยดน้ำโซดาลงในน้ำปูนใส จะเกิด…',
+    opts:[{t:'ไม่มีการเปลี่ยนแปลง'},{t:'น้ำปูนใสขุ่นขาวและเกิดตะกอน'},{t:'เกิดฟองแก๊สมากขึ้นเรื่อย ๆ จนล้น'},{t:'สีเปลี่ยนเป็นสีชมพู'}], ans:1, result:'น้ำปูนใสขุ่นขาวและมีตะกอนสีขาว',
+    hints:['หาว่าลมหายใจออกกับน้ำโซดามีสิ่งใดเหมือนกัน','ทั้งสองมีแก๊สคาร์บอนไดออกไซด์ ดูว่าแก๊สนี้ทำให้น้ำปูนใสเป็นอย่างไรในหน้า 20']},
+   {type:'run', scene:'lime', tag:'การทดลองที่ 2 · โต๊ะทดลอง', q:'หยดน้ำโซดาลงในน้ำปูนใส แล้วสังเกตให้ดี', obs:['น้ำปูนใสเปลี่ยนจากใสเป็นขุ่นขาว','ตั้งทิ้งไว้มีตะกอนสีขาวตกลงที่ก้นหลอด','อุณหภูมิคงที่ 25 °C']},
+   {type:'match', tag:'การทดลองที่ 2 · ตรวจสอบการคาดการณ์', q:'ผลที่เกิดขึ้นตรงกับที่คาดการณ์หรือไม่?'},
+   {type:'choice', skill:'exper', pts:5, tag:'การทดลองที่ 2 · ออกแบบการทดลองต่อ', q:'ถ้าต้องการทดสอบว่า “จำนวนหยดน้ำโซดา” มีผลต่อความขุ่นของน้ำปูนใสหรือไม่ โดยเติม 5, 10 และ 15 หยด ในหลอด 3 หลอด สิ่งใดต้องเท่ากันทุกหลอด?',
+    opts:[
+     {t:'จำนวนหยดน้ำโซดา', why:'นี่คือสิ่งที่ตั้งใจเปลี่ยน (ตัวแปรต้น) จึงต้องต่างกันในแต่ละหลอด'},
+     {t:'ความขุ่นที่เกิดขึ้น', why:'ความขุ่นคือผลที่ต้องวัด (ตัวแปรตาม) เรายังไม่รู้ว่าจะเท่ากันหรือไม่'},
+     {t:'สีของฝาขวดน้ำโซดา', why:'สีฝาขวดไม่ส่งผลต่อความขุ่น จึงไม่จำเป็นต้องควบคุม'},
+     {t:'ปริมาณน้ำปูนใสในแต่ละหลอด'},
+    ], ans:3, ok:'ปริมาณน้ำปูนใสเป็นตัวแปรควบคุม ถ้าไม่เท่ากัน จะไม่รู้ว่าความขุ่นต่างกันเพราะน้ำโซดาหรือเพราะน้ำปูนใส', ev:'การทดลองที่ยุติธรรมเปลี่ยนเพียงสิ่งเดียว แล้ววัดผลที่เกิดขึ้น',
+    hints:['มีสิ่งที่ตั้งใจเปลี่ยน 1 อย่าง สิ่งที่วัดผล 1 อย่าง ที่เหลือต้องเท่ากัน','ถ้าน้ำปูนใสหลอดหนึ่งมี 5 mL อีกหลอดมี 20 mL ผลจะยุติธรรมไหม?']},
+  ]},
+ {name:'ห้องสังเกตการณ์', skill:'การสังเกตและเก็บข้อมูล', digit:9, c:'--r4',
+  mission:'ภารกิจห้องทดลองฉุกเฉิน: สาร X และสาร Y ฉลากหลุด เป็นของเหลวใสทั้งคู่ และถูกผสมกันโดยไม่ทราบสาเหตุ สังเกตและบันทึกให้ครบ',
+  steps:[
+   {type:'run', scene:'xy', tag:'ภารกิจฉุกเฉิน · ดูเหตุการณ์ซ้ำ', q:'กดเริ่มเพื่อดูการผสมสาร X กับสาร Y แล้วสังเกตทุกอย่างที่เปลี่ยนไป', obs:['ดูซ้ำได้ในข้อถัดไป']},
+   {type:'table', skill:'observe', pts:10, tag:'ภารกิจฉุกเฉิน · บันทึกผล', q:'บันทึกผลหลังผสมให้ครบทุกแถว (ช่องก่อนผสมบันทึกไว้แล้ว)', scene:'xy',
+    rows:[
+     {n:'สี', before:'ใส ไม่มีสี', opts:['ใส ไม่มีสี','สีเหลือง','สีชมพู','ขาวขุ่น'], ans:1},
+     {n:'สถานะ', before:'ของเหลว', opts:['ของเหลว','ของแข็งทั้งหมด','แก๊ส'], ans:0},
+     {n:'ตะกอน', before:'ไม่มี', opts:['ไม่มี','มี'], ans:1},
+     {n:'ฟองแก๊ส', before:'ไม่มี', opts:['ไม่มี','มี'], ans:0},
+     {n:'อุณหภูมิ', before:'25 °C', opts:['20 °C','25 °C','30 °C'], ans:1},
+    ], ok:'บันทึกครบและตรงกับสิ่งที่เห็น: สีเปลี่ยนเป็นเหลือง เกิดตะกอน ไม่มีฟอง อุณหภูมิเท่าเดิม', ev:'ภาพการทดลองและค่าบนเทอร์โมมิเตอร์',
+    hints:['กดดูการทดลองซ้ำ แล้วสังเกตทีละอย่าง: สี ของแข็งที่ก้นหลอด ฟอง และตัวเลขบนเทอร์โมมิเตอร์','ตะกอนคือของแข็งที่จมอยู่ก้นหลอด ส่วนของเหลวด้านบนยังคงเป็นของเหลว']},
+   {type:'multi', skill:'observe', pts:5, tag:'ภารกิจฉุกเฉิน · หาหลักฐาน', q:'การเปลี่ยนแปลงใดเป็นหลักฐานว่ามีสารใหม่เกิดขึ้น? (เลือกได้มากกว่า 1 ข้อ)',
+    opts:[
+     {t:'สีเปลี่ยนจากใสเป็นสีเหลือง', c:true},
+     {t:'สารผสมยังเป็นของเหลว', why:'สถานะเหมือนเดิม จึงไม่ได้บอกว่าเกิดสารใหม่'},
+     {t:'เกิดตะกอน', c:true},
+     {t:'อุณหภูมิเท่าเดิม 25 °C', why:'อุณหภูมิไม่เปลี่ยน จึงใช้เป็นหลักฐานไม่ได้'},
+    ], ok:'สีที่เปลี่ยนและตะกอนที่เกิดขึ้น เป็นหลักฐานของการเปลี่ยนแปลงทางเคมี', ev:'แถวในตารางบันทึกที่ค่า “ก่อน” กับ “หลัง” ไม่เหมือนกัน',
+    hints:['หลักฐานต้องเป็นสิ่งที่ “เปลี่ยนไป” เมื่อเทียบก่อนกับหลังผสม','ดูตารางที่บันทึกไว้ แถวใดที่ค่าก่อนและหลังไม่เหมือนกัน']},
+  ]},
+ {name:'ห้องวิเคราะห์ข้อมูล', skill:'การคิดวิเคราะห์', digit:6, c:'--r5',
+  mission:'ภารกิจการทดลองที่หายไป: สมุดบันทึกขาดหายบางหน้า วิเคราะห์ข้อมูลที่เหลือเพื่อเติมส่วนที่หายไป',
+  steps:[
+   {type:'choice', skill:'analyze', pts:5, ctx:T5, q:'ข้อใดอธิบายข้อมูลในตารางได้เหมาะสมที่สุด?',
+    opts:[
+     {t:'อุณหภูมิหลังผสมสูงขึ้นทุกครั้ง ประมาณ 5–6 °C'},
+     {t:'อุณหภูมิลดลงหลังผสมทุกครั้ง', why:'ค่าหลังผสม (30–31 °C) มากกว่าก่อนผสม (25 °C) ทุกครั้ง จึงเป็นการเพิ่มขึ้น'},
+     {t:'ครั้งที่ 2 ผิดพลาด จึงควรตัดทิ้ง', why:'31 °C ต่างจากครั้งอื่นเพียง 1 °C ยังอยู่ในแนวโน้มเดียวกัน ไม่ใช่ความผิดพลาด'},
+     {t:'อุณหภูมิไม่เปลี่ยน เพราะเริ่มที่ 25 °C ทุกครั้ง', why:'อุณหภูมิเริ่มเท่ากันเพราะควบคุมไว้ แต่หลังผสมเปลี่ยนเป็น 30–31 °C'},
+    ], ans:0, ok:'ผลต่างคือ +5, +6 และ +5 °C ผลซ้ำกันทั้ง 3 ครั้งจึงเชื่อถือได้', ev:'อุณหภูมิหลัง − อุณหภูมิก่อน ของแต่ละครั้ง',
+    hints:['ลองหาผลต่าง: อุณหภูมิหลังผสม − อุณหภูมิก่อนผสม ในแต่ละครั้ง','ผลต่างคือ 5, 6 และ 5 °C เป็นบวกทุกครั้ง แปลว่าอะไร?']},
+   {type:'choice', skill:'analyze', pts:5, ctx:CHART5, q:'กราฟหน้านี้ขาดหายไป 1 แท่ง ความสูงฟองเมื่อใช้ผงฟู 3 ช้อนน่าจะเป็นเท่าใด?',
+    opts:[
+     {t:'5 cm', why:'ถ้าเป็น 5 cm ความสูงจะเพิ่มไม่สม่ำเสมอ (2 → 4 → 5 → 8)'},
+     {t:'6 cm'},
+     {t:'7 cm', why:'ถ้าเป็น 7 cm ความสูงจะเพิ่ม 3 cm แล้วเพิ่มแค่ 1 cm ไม่เข้ากับแนวโน้ม'},
+     {t:'8 cm', why:'8 cm คือผลของผงฟู 4 ช้อน ผงฟู 3 ช้อนควรน้อยกว่านั้น'},
+    ], ans:1, ok:'เพิ่มผงฟูทีละ 1 ช้อน ฟองสูงขึ้นครั้งละ 2 cm (2, 4, 6, 8) จึงเป็นความสัมพันธ์แบบเพิ่มขึ้นสม่ำเสมอ', ev:'ความสูงฟองของ 1, 2 และ 4 ช้อน คือ 2, 4 และ 8 cm',
+    hints:['ดูว่าจาก 1 ช้อนเป็น 2 ช้อน ความสูงฟองเพิ่มขึ้นกี่เซนติเมตร','ความสูงเพิ่มครั้งละ 2 cm ลองนับต่อจาก 4 cm']},
+   {type:'choice', skill:'analyze', pts:5, ctx:T5, q:'ข้อใดเป็นข้อมูลจากการสังเกตหรือการวัดโดยตรง (ไม่ใช่การลงความเห็น)?',
+    opts:[
+     {t:'สาร A กับสาร B ทำปฏิกิริยาเคมีกัน', why:'เป็นการลงความเห็นจากข้อมูล ไม่ได้เห็นหรือวัดได้โดยตรง'},
+     {t:'สาร A น่าจะเป็นสารอันตราย', why:'เป็นการคาดเดา ไม่มีข้อมูลใดในตารางบอกเรื่องอันตราย'},
+     {t:'ถ้าใช้สาร A มากขึ้น อุณหภูมิจะสูงกว่านี้', why:'เป็นการพยากรณ์ ยังไม่ได้ทดลองจริง'},
+     {t:'การทดลองครั้งที่ 2 เทอร์โมมิเตอร์อ่านค่าได้ 31 °C หลังผสม'},
+    ], ans:3, ok:'ตัวเลขที่อ่านได้จากเครื่องมือคือข้อมูลจากการวัดโดยตรง ข้อความอื่นเป็นการลงความเห็นหรือการคาดเดา', ev:'ตารางมีเพียงตัวเลขอุณหภูมิที่อ่านจากเทอร์โมมิเตอร์',
+    hints:['ข้อมูลจากการสังเกตคือสิ่งที่เห็นหรือวัดได้จริง ไม่ต้องตีความ','มองหาข้อความที่มีตัวเลขซึ่งอ่านจากเครื่องมือ']},
+  ]},
+ {name:'ห้องสรุปผล', skill:'การใช้เหตุผลและสรุปผล', digit:1, c:'--r6',
+  mission:'ด่านสุดท้ายก่อนเปิดห้องลับ: ข้อสรุปต้องมาจากข้อมูลเท่านั้น ไม่ใช่คำตอบที่ฟังดูน่าจะถูก',
+  steps:[
+   {type:'choice', skill:'conclude', pts:5, ctx:RECAP4, q:'ข้อสรุปใดสอดคล้องกับข้อมูลมากที่สุด?',
+    opts:[
+     {t:'เกิดสารใหม่ เพราะอุณหภูมิสูงขึ้น', why:'อุณหภูมิเป็น 25 °C ทั้งก่อนและหลัง ไม่ได้สูงขึ้น ข้อสรุปนี้ขัดกับข้อมูล'},
+     {t:'ไม่เกิดการเปลี่ยนแปลงใด ๆ เพราะสารยังเป็นของเหลว', why:'สถานะที่เหมือนเดิมไม่ได้แปลว่าไม่เปลี่ยนแปลง ข้อมูลยังมีสีเปลี่ยนและตะกอน'},
+     {t:'การผสม X กับ Y ทำให้เกิดสารใหม่ (การเปลี่ยนแปลงทางเคมี) เพราะสีเปลี่ยนเป็นสีเหลืองและเกิดตะกอน'},
+     {t:'สาร X และสาร Y เป็นสารพิษ', why:'ไม่มีข้อมูลใดในการทดลองบอกเรื่องความเป็นพิษ'},
+    ], ans:2, ok:'ข้อสรุปนี้อ้างหลักฐาน 2 อย่างที่บันทึกไว้จริง คือสีเปลี่ยนและเกิดตะกอน', ev:'ตารางบันทึกผลจากห้องสังเกตการณ์',
+    hints:['ตัดตัวเลือกที่ขัดกับตัวเลขหรือข้อมูลในตารางออกก่อน','ข้อสรุปที่ดีต้องบอกเหตุผลจากแถวที่ค่าก่อนและหลังไม่เหมือนกัน']},
+   {type:'choice', skill:'conclude', pts:5, ctx:`<div class="note"><h3>ข้อมูลที่มีอยู่</h3><p><span class="pg">หน้า 12</span>น้ำมะนาว + ผงฟู → เกิดฟอง</p><p><span class="pg">การทดลองที่ 1</span>น้ำส้มสายชู + ผงฟู → เกิดฟอง</p></div>`,
+    q:'เพื่อนคนหนึ่งสรุปว่า “สารที่มีรสเปรี้ยวทุกชนิด เมื่อผสมกับสารใดก็ตาม จะเกิดฟองแก๊สเสมอ” ข้อสรุปนี้เป็นอย่างไร?',
+    opts:[
+     {t:'ถูกต้อง เพราะการทดลองที่ 1 เกิดฟองจริง', why:'ฟองเกิดจริง แต่ทดสอบกับผงฟูเพียงสารเดียว จะสรุปถึง “สารใดก็ตาม” ไม่ได้'},
+     {t:'เกินกว่าข้อมูล เพราะทดลองเฉพาะน้ำมะนาวและน้ำส้มสายชูกับผงฟูเท่านั้น'},
+     {t:'ถูกต้อง เพราะน้ำส้มสายชูมีรสเปรี้ยว', why:'รสเปรี้ยวเป็นสมบัติของสาร แต่ไม่ได้พิสูจน์ว่าจะเกิดฟองกับทุกสาร'},
+     {t:'ผิด เพราะน้ำมะนาวไม่มีรสเปรี้ยว', why:'สมุดบันทึกระบุว่าน้ำมะนาวมีรสเปรี้ยว ข้อนี้ขัดกับข้อมูล'},
+    ], ans:1, ok:'ข้อสรุปที่ดีต้องอยู่ในขอบเขตของข้อมูล ถ้าอยากรู้ว่าสารเปรี้ยวชนิดอื่นหรือสารอื่นเกิดฟองไหม ต้องทดลองเพิ่ม', ev:'มีข้อมูลเพียง 2 การทดลอง และทั้งสองใช้ผงฟู',
+    hints:['นับดูว่ามีการทดลองกี่ครั้ง และใช้สารอะไรบ้าง','คำว่า “ทุกชนิด” และ “สารใดก็ตาม” กว้างกว่าข้อมูลที่มีหรือไม่?']},
+  ]},
+];
+const CODE = ROOMS.map(r => r.digit).join('');
+const GRADED = ROOMS.reduce((n,R) => n + R.steps.filter(s => s.skill).length, 0);
+
+/* ---------- state ---------- */
+let state = fresh();
+function fresh(){
+  return {screen:'start', player:{name:'',cls:'',no:''}, room:0, step:0, rec:{}, tubes:3, refills:0,
+    hintsTotal:0, wrongTotal:0, t0:null, t1:null, door:'', doorMsg:'', running:false, toast:'',
+    saved:false, copyText:'', confirmClear:false, calc:null, startErr:''};
+}
+const rk = (r,s) => r + '-' + s;
+function rec(r = state.room, s = state.step){
+  const k = rk(r,s);
+  return state.rec[k] || (state.rec[k] = {sel:null, wrong:0, hints:0, done:false, score:0, tried:[], fb:null, frac:null, place:{}, order:[], cells:{}, multi:[], bad:[]});
+}
+const room = () => ROOMS[state.room];
+const step = () => room().steps[state.step];
+const r1 = n => Math.round(n * 10) / 10;
+const fmt = n => { const v = r1(n); return Number.isInteger(v) ? String(v) : v.toFixed(1); };
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const KTH = 'กขคงจฉ';
+
+function skillScores(){
+  const o = {}; SKILLS.forEach(s => o[s.k] = 0);
+  ROOMS.forEach((R,ri) => R.steps.forEach((S,si) => { const x = state.rec[rk(ri,si)]; if (S.skill && x && x.done) o[S.skill] += x.score; }));
+  Object.keys(o).forEach(k => o[k] = r1(o[k]));
+  return o;
+}
+const total = () => r1(Object.values(skillScores()).reduce((a,b) => a + b, 0));
+const rank = t => t <= 30 ? 'นักวิทยาศาสตร์ฝึกหัด' : t <= 60 ? 'ผู้ช่วยนักวิทยาศาสตร์' : t <= 80 ? 'นักวิทยาศาสตร์รุ่นเยาว์' : 'นักวิทยาศาสตร์ผู้เชี่ยวชาญ';
+const factor = x => Math.max(0, 1 - 0.5 * x.wrong - 0.2 * x.hints);
+const hintFactor = x => Math.max(0, 1 - 0.2 * x.hints);
+const roomScore = ri => r1(ROOMS[ri].steps.reduce((a,S,si) => { const x = state.rec[rk(ri,si)]; return a + (S.skill && x && x.done ? x.score : 0); }, 0));
+const roomMax = ri => ROOMS[ri].steps.reduce((a,S) => a + (S.pts || 0), 0);
+
+function loseTube(){
+  state.tubes -= 1; state.wrongTotal += 1;
+  if (state.tubes <= 0){ state.tubes = 3; state.refills += 1; toast('หลอดทดลองแตกหมดแล้ว ผู้ช่วยนำหลอดสำรองมาให้ 3 หลอด ความผิดพลาดเป็นส่วนหนึ่งของการเรียนรู้ เล่นต่อได้เลย'); }
+}
+let toastTimer;
+function toast(msg){ state.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { state.toast = ''; const t = document.querySelector('.toast'); if (t) t.remove(); }, 4200); }
+
+/* ---------- storage ---------- */
+function loadHistory(){ try { return JSON.parse(localStorage.getItem(KEY) || '[]'); } catch(e){ return []; } }
+function saveHistory(list){ try { localStorage.setItem(KEY, JSON.stringify(list)); return true; } catch(e){ return false; } }
+
+/* ---------- svg helpers ---------- */
+function rackTube(){ return `<svg viewBox="0 0 14 30" aria-hidden="true"><path class="fill" d="M3.4 14h7.2v10a3.6 3.6 0 0 1-7.2 0z"/><path class="glass" d="M1 1.5h12M3 1.5v22.5a4 4 0 0 0 8 0V1.5"/></svg>`; }
+function equipIcon(k){ return `<svg viewBox="0 0 48 48" aria-hidden="true">${ICON[k]}</svg>`; }
+function sampleSVG(kind){
+  const liq = {clear:'var(--water)', sand:'var(--water)', oil:'var(--water)', chalk:'var(--milk)', color:'var(--pinkliq)'}[kind];
+  let extra = '';
+  if (kind === 'sand') extra = [16,21,26,31,36,41,19,24,29,34,39].map((x,i) => `<circle cx="${x}" cy="${i < 6 ? 56 : 53}" r="2" fill="var(--sand)"/>`).join('');
+  if (kind === 'oil') extra = `<rect x="14" y="24" width="32" height="9" fill="var(--oil)" opacity=".9"/>`;
+  if (kind === 'chalk') extra = [17,22,27,32,37,42,20,30,40].map((x,i) => `<circle cx="${x}" cy="${i < 6 ? 56 : 53.5}" r="1.8" fill="var(--chalk)" stroke="var(--glass)" stroke-width=".5"/>`).join('');
+  return `<svg viewBox="0 0 60 64" aria-hidden="true"><defs><clipPath id="sc-${kind}"><path d="M14 8V54Q14 59 19 59H41Q46 59 46 54V8z"/></clipPath></defs><g clip-path="url(#sc-${kind})"><rect x="13" y="24" width="34" height="36" fill="${liq}"/>${extra}</g><path d="M10 8H50M13 8V54Q13 60 19 60H41Q47 60 47 54V8" fill="none" stroke="var(--glass)" stroke-width="2"/></svg>`;
+}
+const tempY = t => 172 - (t - 15) * 6.5;
+function sceneSVG(name, mode){
+  const c = SCENES[name], beaker = c.vessel === 'beaker';
+  const cx = 130;
+  let s = `<svg viewBox="0 0 300 226" class="scene ${mode} ${name === 'xy' ? 'xy' : ''}" data-scene="${name}" role="img" aria-label="การทดลอง ${c.label}" style="--liq-from:${c.from};--liq-to:${c.to}"><defs>`;
+  s += beaker ? `<clipPath id="vclip"><path d="M81 40V178Q81 189 92 189H168Q179 189 179 178V40z"/></clipPath>` : `<clipPath id="vclip"><path d="M111 30V175A19 19 0 0 0 149 175V30z"/></clipPath>`;
+  s += `</defs>`;
+  if (c.srcs){
+    s += `<g><path d="M24 70v58a8 8 0 0 0 16 0V70" class="glass" style="stroke-width:1.8"/><rect class="src" x="25.5" y="96" width="13" height="38" rx="5" fill="var(--water)"/><text x="32" y="62" text-anchor="middle" class="lbl">X</text></g>`;
+    s += `<g><path d="M52 70v58a8 8 0 0 0 16 0V70" class="glass" style="stroke-width:1.8"/><rect class="src" x="53.5" y="96" width="13" height="38" rx="5" fill="var(--water)"/><text x="60" y="62" text-anchor="middle" class="lbl">Y</text></g>`;
+  }
+  s += `<g clip-path="url(#vclip)">`;
+  s += beaker ? `<rect class="liq" x="80" y="128" width="100" height="62"/>` : `<rect class="liq" x="110" y="${c.srcs ? 118 : 104}" width="40" height="${c.srcs ? 78 : 92}"/>`;
+  if (c.foam) s += `<g class="foam"><rect x="80" y="100" width="100" height="30" fill="var(--foam)" opacity=".92"/>${[86,98,110,122,134,146,158,170].map((x,i) => `<circle cx="${x}" cy="${100 + (i%2)*2}" r="7" fill="var(--foam)" stroke="var(--glass)" stroke-width=".6"/>`).join('')}</g>`;
+  if (c.bubbles) s += [92,104,116,128,140,152,164,98,122,146,170,110].map((x,i) => `<circle class="bub" cx="${x}" cy="${182 - (i%3)*6}" r="${2 + (i%3)}" style="--d:${(i*0.11).toFixed(2)}s"/>`).join('');
+  if (c.precip) s += [118,124,130,136,142,121,127,133,139,124,130,136].map((x,i) => `<circle class="pp" cx="${x}" cy="${i < 5 ? 189 : i < 9 ? 184 : 179}" r="2.6" fill="${c.precip}" stroke="var(--glass)" stroke-width=".5" style="transition-delay:${(1.9 + i*0.05).toFixed(2)}s"/>`).join('');
+  s += `</g>`;
+  s += beaker
+    ? `<path class="glass" d="M74 40H186M80 40V178Q80 190 92 190H168Q180 190 180 178V40"/>${[70,90,110,130,150,170].map(y => `<line class="tick" x1="166" x2="176" y1="${y}" y2="${y}"/>`).join('')}`
+    : `<path class="glass" d="M104 30H156M110 30V175A20 20 0 0 0 150 175V30"/>`;
+  if (c.powder) s += `<g class="powder">${[122,128,134,125,131,137,128].map((x,i) => `<circle cx="${x}" cy="${i < 3 ? 22 : i < 6 ? 28 : 16}" r="2.6" fill="var(--chalk)" stroke="var(--glass)" stroke-width=".7"/>`).join('')}</g>`;
+  if (c.drops) s += `<g><path d="M${cx} 2c-4 0-6 2.5-6 6v7h12V8c0-3.5-2-6-6-6z" fill="var(--bench)" stroke="var(--glass)" stroke-width="1.6"/><path d="M${cx-2.5} 15h5v22l-2.5 5-2.5-5z" fill="var(--bench)" stroke="var(--glass)" stroke-width="1.4"/>${[0,1].map(i => `<circle class="drop" cx="${cx}" cy="46" r="3" style="--d:${(i*0.28).toFixed(2)}s"/>`).join('')}</g>`;
+  const t = mode === 'done' ? c.t1 : c.t0, ty = tempY(t);
+  s += `<g><rect x="232" y="30" width="16" height="152" rx="8" fill="var(--bench)" stroke="var(--glass)" stroke-width="1.8"/><circle cx="240" cy="187" r="13" fill="var(--bad)" stroke="var(--glass)" stroke-width="1.8"/><rect class="merc" x="237" y="${ty.toFixed(1)}" width="6" height="${(186 - ty).toFixed(1)}" rx="3"/>`;
+  [20,25,30].forEach(v => { s += `<line class="tick" x1="248" x2="256" y1="${tempY(v)}" y2="${tempY(v)}"/><text x="259" y="${tempY(v)+3}" class="tlbl">${v}</text>`; });
+  s += `<text x="240" y="220" text-anchor="middle" class="read" data-read>${t.toFixed(1)} °C</text></g>`;
+  s += `<text x="${c.srcs ? 100 : cx}" y="220" text-anchor="middle" class="lbl">${c.label}</text></svg>`;
+  return s;
+}
+function animTemp(svg, t0, t1, dur, delay){
+  const merc = svg.querySelector('.merc'), read = svg.querySelector('[data-read]');
+  if (!merc || t0 === t1) return;
+  const start = performance.now() + delay;
+  const tick = now => {
+    const p = Math.min(1, Math.max(0, (now - start) / dur));
+    const t = t0 + (t1 - t0) * p, y = tempY(t);
+    merc.setAttribute('y', y.toFixed(1)); merc.setAttribute('height', (186 - y).toFixed(1));
+    read.textContent = t.toFixed(1) + ' °C';
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+function playScene(svg, done){
+  const c = SCENES[svg.dataset.scene];
+  if (reduce){ svg.classList.remove('idle','go'); svg.classList.add('done'); const y = tempY(c.t1); svg.querySelector('.merc').setAttribute('y', y); svg.querySelector('.merc').setAttribute('height', 186 - y); svg.querySelector('[data-read]').textContent = c.t1.toFixed(1) + ' °C'; done(); return; }
+  svg.classList.remove('done','go'); svg.classList.add('idle');
+  const m = svg.querySelector('.merc'), y0 = tempY(c.t0); m.setAttribute('y', y0); m.setAttribute('height', 186 - y0); svg.querySelector('[data-read]').textContent = c.t0.toFixed(1) + ' °C';
+  void svg.getBoundingClientRect();
+  svg.classList.remove('idle'); svg.classList.add('go');
+  animTemp(svg, c.t0, c.t1, 2200, 900);
+  setTimeout(() => { svg.classList.remove('go'); svg.classList.add('done'); done(); }, 3500);
+}
+
+/* ---------- views ---------- */
+function hud(){
+  const finished = state.screen === 'door' || state.screen === 'result';
+  const tubes = ROOMS.map((R,i) => {
+    const doneRoom = finished || i < state.room || (i === state.room && state.screen === 'roomDone');
+    const cls = doneRoom ? 'is-done' : i === state.room ? 'is-now' : '';
+    return `<li class="${cls}" style="--c:var(${R.c})" title="ห้อง ${i+1} ${R.name}">${rackTube()}</li>`;
+  }).join('');
+  const lives = [0,1,2].map(i => `<span class="life ${i < state.tubes ? '' : 'is-broken'}"></span>`).join('');
+  return `<header class="hud"><div class="hud-in"><span class="brand">Science Lab</span><ol class="rack" aria-label="ความคืบหน้า ห้องที่ ${Math.min(state.room+1,6)} จาก 6">${tubes}</ol><span class="lives" role="img" aria-label="หลอดทดลองเหลือ ${state.tubes} หลอด">${lives}</span><span class="score">คะแนน <b>${fmt(total())}</b></span></div></header>`;
+}
+const toastHTML = () => state.toast ? `<div class="toast" role="status">${esc(state.toast)}</div>` : '';
+
+function viewStart(){
+  const colors = ['--r1','--r2','--r3','--r4','--r5','--r6'], lv = [0.55,0.7,0.45,0.8,0.6,0.5];
+  let rack = `<svg class="hero-rack" viewBox="0 0 420 150" role="img" aria-label="ชั้นวางหลอดทดลอง 6 หลอด แทนห้องทดลอง 6 ห้อง">`;
+  colors.forEach((c,i) => { const x = 40 + i*62, h = 96*lv[i];
+    rack += `<rect x="${x-14}" y="${118-h}" width="28" height="${h}" rx="0" fill="var(${c})" opacity=".85"/><path d="M${x-14} ${118-h}h28v${h}a14 14 0 0 1-28 0z" fill="var(${c})"/><path d="M${x-20} 10h40M${x-15} 10v108a15 15 0 0 0 30 0V10" fill="none" stroke="var(--glass)" stroke-width="2.4"/><text x="${x}" y="${118 - h - 8}" text-anchor="middle" class="tlbl" style="font-family:var(--f-mono);font-size:12px;fill:var(--ink-2)">${i+1}</text>`; });
+  rack += `<rect x="6" y="96" width="408" height="10" rx="3" fill="var(--bench-2)" stroke="var(--line)"/></svg>`;
+  return `<div class="start">
+   <section class="hero">${rack}
+    <h1>Science Lab<small>ห้องทดลองปริศนา</small></h1>
+    <p>ห้องทดลองเกิดเหตุขัดข้อง ข้อมูลการทดลองหายไปบางส่วน คุณคือนักวิทยาศาสตร์ฝึกหัดที่ต้องผ่าน 6 ห้อง เก็บชิ้นส่วนรหัสลับห้องละ 1 หลัก แล้วใช้รหัสเปิดห้องทดลองสุดท้าย</p>
+    <ul class="rules">
+     <li><b>คิดก่อนทดลอง</b>ทุกการทดลองต้องคาดการณ์ก่อน แล้วจึงดูผลจริง</li>
+     <li><b>หลอดทดลอง 3 หลอด</b>ตอบผิดเสีย 1 หลอด หมดแล้วได้หลอดสำรอง ไม่มีแพ้</li>
+     <li><b>คำใบ้ 2 ระดับ</b>ใช้คำใบ้ครั้งละ หักคะแนนข้อนั้น 20%</li>
+     <li><b>คะแนนเต็ม 100</b>คะแนนแยกตาม 7 ทักษะของนักวิทยาศาสตร์</li>
+    </ul>
+   </section>
+   <section class="stage">
+    <h2 class="section-title">ลงทะเบียนเข้าห้องทดลอง</h2>
+    <div class="form">
+     <div class="field f-name"><label for="pname">ชื่อ–นามสกุล</label><input id="pname" autocomplete="off" value="${esc(state.player.name)}" placeholder="เช่น ด.ญ. ใจดี มีสุข"></div>
+     <div class="field"><label for="pcls">ชั้น/ห้อง</label><input id="pcls" autocomplete="off" value="${esc(state.player.cls)}" placeholder="ป.5/1"></div>
+     <div class="field"><label for="pno">เลขที่</label><input id="pno" inputmode="numeric" autocomplete="off" value="${esc(state.player.no)}" placeholder="12"></div>
+    </div>
+    ${state.startErr ? `<p class="msg-bad" style="text-align:left">${esc(state.startErr)}</p>` : ''}
+    <div class="actions" style="justify-content:space-between">
+     <button class="link" data-act="teacher">สำหรับครูและผู้วิจัย</button>
+     <button class="btn btn-primary" data-act="start">เข้าห้องทดลอง</button>
+    </div>
+   </section></div>`;
+}
+
+function viewRoom(){
+  const R = room(), S = step(), x = rec();
+  const n = R.steps.length;
+  let body = '';
+  switch (S.type){
+    case 'equip': body = vEquip(S,x); break;
+    case 'choice': case 'predict': body = vChoice(S,x); break;
+    case 'sort': body = vSort(S,x); break;
+    case 'order': body = vOrder(S,x); break;
+    case 'table': body = vTable(S,x); break;
+    case 'multi': body = vMulti(S,x); break;
+    case 'run': body = vRun(S,x); break;
+    case 'match': body = vMatch(S,x); break;
+  }
+  return `${hud()}<main class="stage">
+   <div class="room-head" style="--c:var(${R.c})"><span class="eyebrow">ห้อง ${state.room+1} จาก 6 · ทักษะ: ${R.skill}</span><h1>${R.name}</h1><p class="mission">${R.mission}</p></div>
+   <div class="step-meta"><span>${S.tag ? esc(S.tag) : 'ขั้นที่ ' + (state.step+1) + ' จาก ' + n}</span>${S.pts ? `<span class="pts">${S.pts} คะแนน</span>` : `<span class="muted">ขั้นที่ ${state.step+1} จาก ${n}</span>`}</div>
+   ${body}
+  </main>${toastHTML()}`;
+}
+const qHTML = S => `${S.ctx ? `<div class="ctx">${S.ctx}</div>` : ''}<h2 class="q">${S.q}</h2>`;
+function hintsHTML(S,x){
+  if (!x.hints) return '';
+  return `<div class="hints">${S.hints.slice(0,x.hints).map((h,i) => `<p class="hint"><b>คำใบ้ ${i+1}</b>${h}</p>`).join('')}</div>`;
+}
+function fbHTML(fb){
+  if (!fb) return '';
+  let h = `<div class="fb ${fb.kind}" role="status"><h3>${fb.title}</h3>`;
+  const rows = [['คำตอบ',fb.answer],['เหตุผล',fb.reason],['หลักฐาน',fb.evidence]].filter(r => r[1]);
+  if (rows.length) h += `<dl>${rows.map(r => `<dt>${r[0]}</dt><dd>${r[1]}</dd>`).join('')}</dl>`;
+  if (fb.list && fb.list.length) h += `<ul>${fb.list.map(l => `<li>${l}</li>`).join('')}</ul>`;
+  return h + `</div>`;
+}
+function actions(S,x,{canCheck=true, checkLabel='ตรวจคำตอบ'}={}){
+  if (x.done){
+    const S2 = step(), predict = S2.type === 'predict';
+    return `<div class="actions"><button class="btn btn-primary" data-act="next">${predict ? 'ไปที่โต๊ะทดลอง' : 'ไปต่อ'}</button></div>`;
+  }
+  const left = S.hints ? 2 - x.hints : 0;
+  return `<div class="actions">${S.hints ? `<button class="btn btn-ghost" data-act="hint" ${left ? '' : 'disabled'}>${left ? `ขอคำใบ้ (เหลือ ${left} · −20%)` : 'ใช้คำใบ้ครบแล้ว'}</button>` : ''}<button class="btn btn-primary" data-act="check" ${canCheck ? '' : 'disabled'}>${checkLabel}</button></div>`;
+}
+function vEquip(S,x){
+  const cards = Object.keys(EQUIP).map(k => {
+    let cls = '';
+    if (x.done && k === S.ans) cls = 'is-ok'; else if (x.tried.includes(k)) cls = 'is-bad'; else if (x.sel === k) cls = 'is-sel';
+    return `<button class="eq ${cls}" data-act="pick" data-k="${k}" ${x.done || x.tried.includes(k) ? 'disabled' : ''} aria-pressed="${x.sel === k}">${equipIcon(k)}<span>${EQUIP[k].name}</span></button>`;
+  }).join('');
+  return `${qHTML(S)}<div class="equip">${cards}</div>${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: x.sel != null})}`;
+}
+function vChoice(S,x){
+  const predict = S.type === 'predict';
+  const opts = S.opts.map((o,i) => {
+    let cls = '';
+    if (predict){ if (x.sel === i) cls = 'is-sel'; }
+    else if (x.done && i === S.ans) cls = 'is-ok';
+    else if (x.tried.includes(i)) cls = 'is-bad';
+    else if (x.sel === i) cls = 'is-sel';
+    return `<button class="opt ${cls}" data-act="pick" data-i="${i}" ${x.done || x.tried.includes(i) ? 'disabled' : ''}><span class="opt-k">${KTH[i]}</span><span>${o.t}</span></button>`;
+  }).join('');
+  return `${qHTML(S)}<div class="opts">${opts}</div>${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: x.sel != null, checkLabel: predict ? 'บันทึกการคาดการณ์' : 'ตรวจคำตอบ'})}`;
+}
+function vMulti(S,x){
+  const opts = S.opts.map((o,i) => {
+    let cls = '';
+    if (x.done) cls = o.c ? 'is-ok' : (x.multi.includes(i) ? 'is-bad' : '');
+    return `<button class="opt ${cls}" data-act="toggle" data-i="${i}" aria-pressed="${x.multi.includes(i)}" ${x.done ? 'disabled' : ''}><span class="opt-k">${x.multi.includes(i) ? '✓' : KTH[i]}</span><span>${o.t}</span></button>`;
+  }).join('');
+  return `${qHTML(S)}<div class="opts">${opts}</div>${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: x.multi.length > 0})}`;
+}
+function vSort(S,x){
+  const cards = S.items.map((it,i) => {
+    const bad = !x.done && x.bad.includes(i) && x.place[i] !== it.ans;
+    const cls = x.done ? 'is-ok' : bad ? 'is-bad' : '';
+    return `<div class="sample ${cls}">${sampleSVG(it.kind)}<b>${it.n}</b><span class="obs">${it.obs}</span>
+     <div class="seg" role="group" aria-label="${it.n}">${S.bins.map((b,bi) => `<button data-act="place" data-i="${i}" data-b="${bi}" aria-pressed="${x.place[i] === bi}" ${x.done ? 'disabled' : ''}>${b}</button>`).join('')}</div>
+     ${bad ? `<span class="why">ลองอ่านผลการสังเกตของสารนี้อีกครั้ง</span>` : ''}</div>`;
+  }).join('');
+  const all = Object.keys(x.place).length === S.items.length;
+  return `<h2 class="q">${S.q}</h2><div class="samples">${cards}</div>${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: all})}`;
+}
+function vOrder(S,x){
+  const chosen = x.done ? S.steps.map((_,i) => i) : x.order;
+  const pool = S.show.filter(i => !chosen.includes(i));
+  const listCls = x.done ? 'is-ok' : (x.fb && x.fb.kind === 'bad' && x.order.length === S.steps.length ? 'is-bad' : '');
+  return `<h2 class="q">${S.q}</h2>
+   <div class="order">
+    <div><h3>ลำดับที่เลือก</h3>${chosen.length ? `<ol class="${listCls}">${chosen.map(i => `<li>${S.steps[i]}</li>`).join('')}</ol>` : `<p class="empty">แตะขั้นตอนทางขวาตามลำดับที่ควรทำ</p>`}
+     ${!x.done && chosen.length ? `<div class="actions" style="justify-content:flex-start;margin-top:6px"><button class="link" data-act="orderUndo">ย้อน 1 ขั้น</button><button class="link" data-act="orderReset">เริ่มเรียงใหม่</button></div>` : ''}</div>
+    <div><h3>ขั้นตอนทั้งหมด</h3><div class="pool">${pool.map(i => `<button class="opt" data-act="orderTap" data-i="${i}">${S.steps[i]}</button>`).join('') || `<p class="muted">เลือกครบทุกขั้นแล้ว</p>`}</div></div>
+   </div>${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: x.order.length === S.steps.length})}`;
+}
+function vTable(S,x){
+  const rows = S.rows.map((r,i) => {
+    const v = x.cells[i];
+    const cls = x.done ? 'row-ok' : (x.bad.includes(i) && v === r.ans ? '' : x.bad.includes(i) ? 'row-bad' : '');
+    return `<tr class="${cls}"><td>${r.n}</td><td>${r.before}</td><td><select id="cell-${i}" data-cell="${i}" ${x.done ? 'disabled' : ''} aria-label="${r.n} หลังผสม"><option value="">— เลือก —</option>${r.opts.map((o,oi) => `<option value="${oi}" ${v === oi ? 'selected' : ''}>${o}</option>`).join('')}</select></td></tr>`;
+  }).join('');
+  const all = S.rows.every((_,i) => x.cells[i] != null);
+  return `<div class="scene-box">${sceneSVG(S.scene,'done')}<button class="btn btn-ghost" data-act="replay">ดูการทดลองอีกครั้ง</button></div>
+   <h2 class="q">${S.q}</h2>
+   <div class="tbl-wrap"><table class="data"><thead><tr><th>สิ่งที่สังเกต</th><th>ก่อนผสม</th><th>หลังผสม</th></tr></thead><tbody>${rows}</tbody></table></div>
+   ${hintsHTML(S,x)}${fbHTML(x.fb)}${actions(S,x,{canCheck: all})}`;
+}
+function vRun(S,x){
+  const R = room();
+  const list = x.done && S.scene !== 'xy' ? `<ul class="obs-list" style="--c:var(${R.c})">${S.obs.map(o => `<li>${o}</li>`).join('')}</ul>` : '';
+  const btn = x.done
+    ? `<div class="actions"><button class="btn btn-ghost" data-act="replay">ดูอีกครั้ง</button><button class="btn btn-primary" data-act="next">${S.scene === 'xy' ? 'ไปบันทึกผล' : 'ไปต่อ'}</button></div>`
+    : `<div class="actions"><button class="btn btn-primary" data-act="run" ${state.running ? 'disabled' : ''}>เริ่มการทดลอง</button></div>`;
+  return `<h2 class="q">${S.q}</h2><div class="scene-box">${sceneSVG(S.scene, x.done ? 'done' : 'idle')}${list}</div>${btn}`;
+}
+function lastPredict(){
+  for (let s = state.step - 1; s >= 0; s--){ const S = room().steps[s]; if (S.type === 'predict') return {S, x: rec(state.room, s)}; }
+  return null;
+}
+function vMatch(S,x){
+  const lp = lastPredict();
+  const said = lp ? lp.S.opts[lp.x.sel].t : '';
+  const res = lp ? lp.S.result : '';
+  const opts = ['ตรงกับที่คาดการณ์','แตกต่างจากที่คาดการณ์'].map((t,i) => {
+    let cls = ''; if (x.done && x.sel === i) cls = x.matchOk ? 'is-ok' : 'is-sel';
+    return `<button class="opt ${cls}" data-act="matchPick" data-i="${i}" ${x.done ? 'disabled' : ''}><span class="opt-k">${KTH[i]}</span><span>${t}</span></button>`;
+  }).join('');
+  return `<div class="tbl-wrap"><table class="data"><tbody><tr><th style="width:40%">ฉันคาดว่า</th><td>${said}</td></tr><tr><th>ผลการทดลองจริง</th><td>${res}</td></tr></tbody></table></div>
+   <h2 class="q">${S.q}</h2><div class="opts">${opts}</div>${fbHTML(x.fb)}${x.done ? `<div class="actions"><button class="btn btn-primary" data-act="next">ไปต่อ</button></div>` : ''}`;
+}
+
+function viewRoomDone(){
+  const R = room(), ri = state.room, last = ri === ROOMS.length - 1;
+  const pieces = ROOMS.map((Q,i) => `<div class="piece ${i <= ri ? '' : 'is-empty'}" style="--c:var(${Q.c})"><span class="d">${i <= ri ? Q.digit : '•'}</span><small>ห้อง ${i+1}</small></div>`).join('');
+  return `${hud()}<main class="stage">
+   <div class="room-head" style="--c:var(${R.c})"><span class="eyebrow">ผ่านห้อง ${ri+1} จาก 6</span><h1>${R.name} สำเร็จ</h1><p class="mission">คะแนนห้องนี้ <b class="mono">${fmt(roomScore(ri))}</b> จาก <span class="mono">${roomMax(ri)}</span></p></div>
+   <div style="display:flex;gap:16px;align-items:center;flex-wrap:wrap"><div class="digit" style="--c:var(${R.c})">${R.digit}</div><p>คุณได้รับชิ้นส่วนรหัสลับหลักที่ ${ri+1} เก็บไว้ให้ดี ต้องใช้เปิดห้องทดลองสุดท้าย</p></div>
+   <div><p class="muted" style="margin-bottom:8px">ชิ้นส่วนรหัสที่สะสมแล้ว</p><div class="pieces">${pieces}</div></div>
+   <div class="actions"><button class="btn btn-primary" data-act="roomNext">${last ? 'ไปที่ประตูห้องทดลองสุดท้าย' : 'ไปห้องถัดไป'}</button></div>
+  </main>${toastHTML()}`;
+}
+function viewDoor(){
+  const pieces = ROOMS.map((Q,i) => `<div class="piece" style="--c:var(${Q.c})"><span class="d">${Q.digit}</span><small>ห้อง ${i+1}</small></div>`).join('');
+  const disp = Array.from({length:6}, (_,i) => `<span>${state.door[i] || ''}</span>`).join('');
+  const keys = [1,2,3,4,5,6,7,8,9].map(n => `<button data-act="key" data-n="${n}">${n}</button>`).join('') + `<button data-act="del" aria-label="ลบ">⌫</button><button data-act="key" data-n="0">0</button><button data-act="enter" aria-label="ยืนยัน" style="background:var(--accent);color:var(--accent-ink);border-color:var(--accent)">✓</button>`;
+  return `${hud()}<main class="stage">
+   <div class="room-head" style="--c:var(--accent)"><span class="eyebrow">ภารกิจสุดท้าย</span><h1>ประตูห้องทดลองสุดท้าย</h1><p class="mission">ประตูล็อกด้วยรหัส 6 หลัก ใช้ชิ้นส่วนรหัสที่สะสมจากทุกห้อง เรียงตามลำดับห้อง 1 ถึง 6</p></div>
+   <div class="pieces">${pieces}</div>
+   <div class="code-display" aria-label="รหัสที่ใส่">${disp}</div>
+   ${state.doorMsg ? `<p class="msg-bad">${state.doorMsg}</p>` : ''}
+   <div class="keypad">${keys}</div>
+  </main>${toastHTML()}`;
+}
+function resultRecord(){
+  const sc = skillScores(), t = total();
+  return {date:new Date(state.t1 || Date.now()).toISOString(), name:state.player.name, cls:state.player.cls, no:state.player.no, total:t,
+    skills:sc, hints:state.hintsTotal, wrong:state.wrongTotal, minutes:r1(((state.t1 || Date.now()) - state.t0) / 60000), rank:rank(t)};
+}
+const CSV_HEAD = 'วันที่,ชื่อ,ชั้น,เลขที่,คะแนนรวม,' + SKILLS.map(s => s.name).join(',') + ',ใช้คำใบ้,ตอบผิด,เวลา(นาที),ระดับ';
+const csvCell = v => { const s = String(v ?? ''); return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+const csvRow = r => [new Date(r.date).toLocaleString('th-TH'), r.name, r.cls, r.no, r.total, ...SKILLS.map(s => r.skills[s.k]), r.hints, r.wrong, r.minutes, r.rank].map(csvCell).join(',');
+
+function viewResult(){
+  const r = resultRecord(), sc = r.skills;
+  const bars = SKILLS.map(s => `<div class="bar-row" style="--c:var(${s.c})"><span>${s.name}</span><div class="bar" role="img" aria-label="${s.name} ${fmt(sc[s.k])} จาก ${s.max}"><i style="width:${(sc[s.k]/s.max*100).toFixed(1)}%"></i></div><span class="v">${fmt(sc[s.k])} / ${s.max}</span></div>`).join('');
+  return `${hud()}<main class="stage">
+   <div class="room-head" style="--c:var(--accent)"><span class="eyebrow">ห้องทดลองสุดท้ายเปิดแล้ว</span><h1>ภารกิจสำเร็จ ${esc(state.player.name)}</h1><p class="mission">คุณกู้ข้อมูลการทดลองที่หายไปได้ครบทั้ง 6 ห้อง</p></div>
+   <div class="big-score"><b>${fmt(r.total)}</b><span>/ 100</span></div>
+   <div><span class="rank">${r.rank}</span></div>
+   <div class="bars">${bars}</div>
+   <div class="stats">
+    <div class="stat"><small>เวลาที่ใช้</small><b>${fmt(r.minutes)}</b> <small style="display:inline">นาที</small></div>
+    <div class="stat"><small>ใช้คำใบ้</small><b>${r.hints}</b> <small style="display:inline">ครั้ง</small></div>
+    <div class="stat"><small>ตอบผิด</small><b>${r.wrong}</b> <small style="display:inline">ครั้ง</small></div>
+    <div class="stat"><small>ข้อที่ให้คะแนน</small><b>${GRADED}</b> <small style="display:inline">ข้อ</small></div>
+   </div>
+   <p class="muted">${state.saved ? 'บันทึกผลไว้ในเครื่องนี้แล้ว ครูดูได้จากหน้า “สำหรับครูและผู้วิจัย”' : 'เครื่องนี้บันทึกผลไม่ได้ กด “คัดลอกผล” แล้วส่งให้ครู'}</p>
+   ${state.copyText ? `<textarea class="copybox" readonly id="copybox">${esc(state.copyText)}</textarea>` : ''}
+   <div class="actions"><button class="btn btn-ghost" data-act="copyResult">คัดลอกผล (CSV)</button><button class="btn btn-ghost" data-act="teacher">สำหรับครู</button><button class="btn btn-primary" data-act="again">เล่นใหม่</button></div>
+  </main>${toastHTML()}`;
+}
+
+/* ---------- statistics (paired t-test) ---------- */
+function gammaln(x){ const c=[76.18009172947146,-86.50532032941677,24.01409824083091,-1.231739572450155,0.1208650973866179e-2,-0.5395239384953e-5]; let y=x, tmp=x+5.5; tmp-=(x+0.5)*Math.log(tmp); let ser=1.000000000190015; for (let j=0;j<6;j++) ser+=c[j]/++y; return -tmp+Math.log(2.5066282746310005*ser/x); }
+function betacf(a,b,x){ const MAXIT=300, EPS=3e-14, FPMIN=1e-300; const qab=a+b, qap=a+1, qam=a-1; let c=1, d=1-qab*x/qap; if (Math.abs(d)<FPMIN) d=FPMIN; d=1/d; let h=d;
+  for (let m=1;m<=MAXIT;m++){ const m2=2*m; let aa=m*(b-m)*x/((qam+m2)*(a+m2)); d=1+aa*d; if (Math.abs(d)<FPMIN) d=FPMIN; c=1+aa/c; if (Math.abs(c)<FPMIN) c=FPMIN; d=1/d; h*=d*c;
+    aa=-(a+m)*(qab+m)*x/((a+m2)*(qap+m2)); d=1+aa*d; if (Math.abs(d)<FPMIN) d=FPMIN; c=1+aa/c; if (Math.abs(c)<FPMIN) c=FPMIN; d=1/d; const del=d*c; h*=del; if (Math.abs(del-1)<EPS) break; }
+  return h; }
+function ibeta(x,a,b){ if (x<=0) return 0; if (x>=1) return 1; const bt=Math.exp(gammaln(a+b)-gammaln(a)-gammaln(b)+a*Math.log(x)+b*Math.log(1-x)); return x<(a+1)/(a+b+2) ? bt*betacf(a,b,x)/a : 1-bt*betacf(b,a,1-x)/b; }
+const mean = a => a.reduce((s,v) => s+v, 0) / a.length;
+const sd = a => { const m = mean(a); return Math.sqrt(a.reduce((s,v) => s+(v-m)**2, 0) / (a.length-1)); };
+function pairedT(pre, post){
+  const n = pre.length, D = post.map((v,i) => v - pre[i]), md = mean(D), sdd = sd(D), df = n - 1;
+  const t = sdd === 0 ? (md === 0 ? 0 : Infinity) : md / (sdd / Math.sqrt(n));
+  const p2 = isFinite(t) ? ibeta(df/(df+t*t), df/2, 0.5) : 0;
+  const p1 = t > 0 ? p2/2 : 1 - p2/2;
+  return {n, df, mPre:mean(pre), sPre:sd(pre), mPost:mean(post), sPost:sd(post), md, sdd, t, p2, p1, d: sdd ? md/sdd : Infinity};
+}
+const EX_PRE = '4 6 5 7 3 6 5 6 4 5', EX_POST = '7 8 7 9 6 8 7 8 6 8';
+const parseNums = s => s.split(/[\s,;]+/).map(v => v.trim()).filter(Boolean).map(Number);
+const f2 = n => isFinite(n) ? n.toFixed(2) : '∞';
+const fp = p => p < .001 ? '< .001' : p.toFixed(3).replace(/^0/,'');
+const dLabel = d => { const a = Math.abs(d); return a >= .8 ? 'ใหญ่' : a >= .5 ? 'ปานกลาง' : a >= .2 ? 'เล็ก' : 'น้อยมาก'; };
+
+function viewTeacher(){
+  const list = loadHistory();
+  const rows = list.length ? list.slice().reverse().map(r => `<tr><td>${esc(r.name)}</td><td>${esc(r.cls)}</td><td class="num">${esc(r.no)}</td><td class="num">${fmt(r.total)}</td><td class="num">${fmt(r.minutes)}</td><td>${new Date(r.date).toLocaleDateString('th-TH')}</td></tr>`).join('')
+    : `<tr><td colspan="6" class="muted">ยังไม่มีผลการเล่นในเครื่องนี้ เมื่อนักเรียนเปิดห้องทดลองสุดท้ายได้ ผลจะแสดงที่นี่</td></tr>`;
+  const c = state.calc || {pre:EX_PRE, post:EX_POST, full:'10', example:true};
+  let out = '';
+  if (c.result){
+    const r = c.result, full = Number(c.full) || 0, pct = v => full ? (v/full*100).toFixed(2) : '–';
+    const sentence = `นักเรียนจำนวน ${r.n} คน มีคะแนนก่อนเรียนเฉลี่ย ${f2(r.mPre)} คะแนน (S.D. = ${f2(r.sPre)}) และหลังเรียนเฉลี่ย ${f2(r.mPost)} คะแนน (S.D. = ${f2(r.sPost)}) คะแนนเพิ่มขึ้นเฉลี่ย ${f2(r.md)} คะแนน ผลการทดสอบ Paired Samples t-test พบว่า t(${r.df}) = ${f2(r.t)}, p ${r.p1 < .001 ? '< .001' : '= ' + fp(r.p1)} (ทางเดียว) ขนาดอิทธิพล d = ${f2(r.d)} อยู่ในระดับ${dLabel(r.d)}`;
+    out = `<div class="tbl-wrap"><table class="data"><thead><tr><th>การทดสอบ</th><th>N</th><th>x̄</th><th>S.D.</th><th>ร้อยละ</th><th>t</th><th>df</th><th>p (ทางเดียว)</th><th>p (สองทาง)</th><th>d</th></tr></thead><tbody>
+      <tr><td>ก่อนเรียน</td><td class="num">${r.n}</td><td class="num">${f2(r.mPre)}</td><td class="num">${f2(r.sPre)}</td><td class="num">${pct(r.mPre)}</td><td class="num">${f2(r.t)}</td><td class="num">${r.df}</td><td class="num">${fp(r.p1)}</td><td class="num">${fp(r.p2)}</td><td class="num">${f2(r.d)}</td></tr>
+      <tr><td>หลังเรียน</td><td class="num">${r.n}</td><td class="num">${f2(r.mPost)}</td><td class="num">${f2(r.sPost)}</td><td class="num">${pct(r.mPost)}</td><td></td><td></td><td></td><td></td><td></td></tr></tbody></table></div>
+      <p class="muted">ผลต่างเฉลี่ย D̄ = ${f2(r.md)}, S<sub>D</sub> = ${f2(r.sdd)} · t ใช้ผลต่าง หลังเรียน − ก่อนเรียน จึงเป็นบวกเมื่อคะแนนเพิ่มขึ้น · d = D̄ / S<sub>D</sub></p>
+      <div class="field"><label for="sentence">ข้อความสำหรับบทที่ 4</label><textarea id="sentence" class="copybox" readonly>${esc(sentence)}</textarea></div>
+      <div class="actions" style="justify-content:flex-start"><button class="btn btn-ghost" data-act="copySentence">คัดลอกข้อความ</button></div>`;
+  } else if (c.error){ out = `<p class="msg-bad" style="text-align:left">${esc(c.error)}</p>`; }
+  return `<div class="start"><main class="stage">
+   <div class="room-head" style="--c:var(--accent)"><span class="eyebrow">สำหรับครูและผู้วิจัย</span><h1>ผลการเล่นและสถิติ</h1><p class="mission">ดูคะแนนดิบที่บันทึกในเครื่องนี้ และคำนวณค่าสถิติคะแนนก่อน–หลังเรียน</p></div>
+   <h2 class="section-title">ผลการเล่นในเครื่องนี้ (${list.length} รายการ)</h2>
+   <div class="tbl-wrap"><table class="data"><thead><tr><th>ชื่อ</th><th>ชั้น</th><th>เลขที่</th><th>คะแนน</th><th>นาที</th><th>วันที่</th></tr></thead><tbody>${rows}</tbody></table></div>
+   ${state.copyText ? `<textarea class="copybox" readonly id="copybox">${esc(state.copyText)}</textarea>` : ''}
+   ${state.confirmClear ? `<div class="confirm"><span>ลบผลการเล่นทั้งหมดในเครื่องนี้? ลบแล้วกู้คืนไม่ได้</span><button class="btn btn-ghost" data-act="clearNo">ยกเลิก</button><button class="btn btn-primary" data-act="clearYes" style="background:var(--bad)">ลบทั้งหมด</button></div>` : ''}
+   <div class="actions" style="justify-content:flex-start"><button class="btn btn-ghost" data-act="copyHistory" ${list.length ? '' : 'disabled'}>คัดลอกเป็น CSV</button><button class="btn btn-ghost" data-act="clearAsk" ${list.length ? '' : 'disabled'}>ลบทั้งหมด</button></div>
+   <p class="muted">ผลเก็บไว้เฉพาะในเบราว์เซอร์ของเครื่องที่เล่น ถ้านักเรียนเล่นคนละเครื่อง ให้นักเรียนกด “คัดลอกผล” ที่หน้าสรุปแล้วส่งให้ครู</p>
+   <h2 class="section-title" style="margin-top:8px">คำนวณ Paired Samples t-test</h2>
+   <p class="muted">วางคะแนนแบบทดสอบก่อนเรียนและหลังเรียน เรียงตามเลขที่ให้ตรงกัน คั่นด้วยช่องว่าง จุลภาค หรือขึ้นบรรทัดใหม่</p>
+   ${c.example ? `<p class="banner">ตัวเลขที่ใส่ไว้เป็นตัวอย่างสมมติ ไม่ใช่ข้อมูลจริง แทนที่ด้วยคะแนนของนักเรียนก่อนคำนวณ</p>` : ''}
+   <div class="form" style="grid-template-columns:1fr 1fr">
+    <div class="field"><label for="pre">คะแนนก่อนเรียน</label><textarea id="pre">${esc(c.pre)}</textarea></div>
+    <div class="field"><label for="post">คะแนนหลังเรียน</label><textarea id="post">${esc(c.post)}</textarea></div>
+    <div class="field"><label for="full">คะแนนเต็ม</label><input id="full" inputmode="numeric" value="${esc(c.full)}"></div>
+   </div>
+   <div class="actions" style="justify-content:flex-start"><button class="btn btn-primary" data-act="calc">คำนวณ</button></div>
+   ${out}
+   <div class="actions"><button class="btn btn-ghost" data-act="home">กลับหน้าแรก</button></div>
+  </main></div>${toastHTML()}`;
+}
+
+/* ---------- render ---------- */
+function render(){
+  const v = {start:viewStart, room:viewRoom, roomDone:viewRoomDone, door:viewDoor, result:viewResult, teacher:viewTeacher}[state.screen];
+  app.innerHTML = v();
+}
+function go(screen){ state.screen = screen; render(); window.scrollTo({top:0, behavior: reduce ? 'auto' : 'smooth'}); }
+
+/* ---------- checking ---------- */
+function okFb(S,x,extra){ return {kind:'ok', title:`ถูกต้อง ได้ ${fmt(x.score)} จาก ${S.pts} คะแนน`, answer:extra, reason:S.ok, evidence:S.ev}; }
+function check(){
+  const S = step(), x = rec(); if (x.done) return;
+  if (S.type === 'equip' || S.type === 'choice'){
+    if (x.sel == null) return;
+    const label = S.type === 'equip' ? EQUIP[x.sel].name : S.opts[x.sel].t;
+    if (x.sel === S.ans){ x.done = true; x.score = r1(S.pts * factor(x));
+      x.fb = okFb(S,x,label); if (S.type === 'equip') x.fb.reason = `${EQUIP[S.ans].name}ใช้${EQUIP[S.ans].use} ตรงกับงานที่ต้องการ`;
+    } else {
+      x.wrong++; x.tried.push(x.sel); loseTube();
+      const why = S.type === 'equip' ? `${EQUIP[x.sel].name}ใช้${EQUIP[x.sel].use} แต่โจทย์ต้องการ${S.need}` : S.opts[x.sel].why;
+      if (x.wrong >= 2){ x.done = true; x.score = 0;
+        const right = S.type === 'equip' ? EQUIP[S.ans].name : S.opts[S.ans].t;
+        x.fb = {kind:'reveal', title:'เฉลยข้อนี้', answer:`คำตอบที่ถูกคือ “${right}”`, reason:(S.type === 'equip' ? `${EQUIP[S.ans].name}ใช้${EQUIP[S.ans].use}` : S.ok) + ` ส่วน “${label}” ไม่ถูก เพราะ${why}`, evidence:S.ev};
+      } else x.fb = {kind:'bad', title:'ยังไม่ถูก ลองอีกครั้ง', answer:`คุณเลือก “${label}”`, reason:why, evidence:S.ev};
+      x.sel = null;
+    }
+  } else if (S.type === 'predict'){
+    if (x.sel == null) return;
+    x.done = true; x.predOk = x.sel === S.ans; x.score = x.predOk ? r1(S.pts * hintFactor(x)) : 0;
+    x.fb = {kind:'note', title:'บันทึกการคาดการณ์แล้ว', answer:`ฉันคาดว่า: ${S.opts[x.sel].t}`, reason:'ไปที่โต๊ะทดลองเพื่อตรวจสอบว่าสิ่งที่คาดไว้เกิดขึ้นจริงหรือไม่'};
+  } else if (S.type === 'sort'){
+    const bad = S.items.map((it,i) => x.place[i] !== it.ans ? i : -1).filter(i => i >= 0);
+    if (x.frac == null) x.frac = (S.items.length - bad.length) / S.items.length;
+    if (!bad.length){ x.done = true; x.score = r1(S.pts * x.frac * hintFactor(x)); x.fb = okFb(S,x,'จัดกลุ่มถูกครบทั้ง 6 ชนิด'); }
+    else { x.wrong++; loseTube(); x.bad = bad;
+      if (x.wrong >= 2){ bad.forEach(i => x.place[i] = S.items[i].ans); x.done = true; x.score = r1(S.pts * x.frac * hintFactor(x));
+        x.fb = {kind:'reveal', title:`เฉลยการจัดกลุ่ม ได้ ${fmt(x.score)} จาก ${S.pts} คะแนน`, reason:S.ok, list:bad.map(i => `<b>${S.items[i].n}</b>: ${S.items[i].why}`)}; }
+      else x.fb = {kind:'bad', title:`ยังจัดกลุ่มไม่ถูก ${bad.length} ชนิด`, reason:'สารที่มีกรอบสีแดงยังอยู่ผิดกลุ่ม อ่านผลการสังเกตของสารนั้นอีกครั้ง แล้วย้ายไปกลุ่มที่ถูกต้อง', evidence:S.ev};
+    }
+  } else if (S.type === 'table'){
+    const bad = S.rows.map((r,i) => x.cells[i] !== r.ans ? i : -1).filter(i => i >= 0);
+    if (x.frac == null) x.frac = (S.rows.length - bad.length) / S.rows.length;
+    if (!bad.length){ x.done = true; x.score = r1(S.pts * x.frac * hintFactor(x)); x.fb = okFb(S,x,'บันทึกถูกครบทั้ง 5 แถว'); }
+    else { x.wrong++; loseTube(); x.bad = bad;
+      if (x.wrong >= 2){ bad.forEach(i => x.cells[i] = S.rows[i].ans); x.done = true; x.score = r1(S.pts * x.frac * hintFactor(x));
+        x.fb = {kind:'reveal', title:`เฉลยตารางบันทึก ได้ ${fmt(x.score)} จาก ${S.pts} คะแนน`, reason:S.ok, list:bad.map(i => `<b>${S.rows[i].n}</b>: หลังผสมคือ “${S.rows[i].opts[S.rows[i].ans]}”`)}; }
+      else x.fb = {kind:'bad', title:`ยังบันทึกไม่ตรง ${bad.length} แถว`, reason:'แถวสีแดงยังไม่ตรงกับการทดลอง กด “ดูการทดลองอีกครั้ง” แล้วแก้ไข', evidence:S.ev};
+    }
+  } else if (S.type === 'order'){
+    const ok = x.order.every((v,i) => v === i);
+    if (ok){ x.done = true; x.score = r1(S.pts * factor(x)); x.fb = okFb(S,x,'เรียงถูกทุกขั้น'); }
+    else { x.wrong++; loseTube();
+      if (x.wrong >= 2){ x.done = true; x.score = 0; x.fb = {kind:'reveal', title:'เฉลยลำดับขั้นตอน', reason:S.ok, evidence:S.ev}; }
+      else { const first = x.order.findIndex((v,i) => v !== i); x.fb = {kind:'bad', title:'ลำดับยังไม่ถูก ลองอีกครั้ง', answer:`ขั้นที่ ${first+1} ยังไม่ถูกตำแหน่ง`, reason:'ลองคิดว่าต้องทำอะไรก่อน จึงจะทำขั้นต่อไปได้', evidence:S.ev}; }
+    }
+  } else if (S.type === 'multi'){
+    const want = S.opts.map((o,i) => o.c ? i : -1).filter(i => i >= 0);
+    const extra = x.multi.filter(i => !S.opts[i].c), missing = want.filter(i => !x.multi.includes(i));
+    if (!extra.length && !missing.length){ x.done = true; x.score = r1(S.pts * factor(x)); x.fb = okFb(S,x, want.map(i => S.opts[i].t).join(' และ ')); }
+    else { x.wrong++; loseTube();
+      const list = extra.map(i => `<b>${S.opts[i].t}</b>: ${S.opts[i].why}`); if (missing.length) list.push(`ยังขาดหลักฐานอีก ${missing.length} ข้อ`);
+      if (x.wrong >= 2){ x.done = true; x.score = 0; x.multi = want; x.fb = {kind:'reveal', title:'เฉลยข้อนี้', answer:want.map(i => S.opts[i].t).join(' และ '), reason:S.ok, list:extra.map(i => `<b>${S.opts[i].t}</b>: ${S.opts[i].why}`), evidence:S.ev}; }
+      else x.fb = {kind:'bad', title:'ยังไม่ถูก ลองอีกครั้ง', list, evidence:S.ev};
+    }
+  }
+  render();
+}
+
+/* ---------- events ---------- */
+const ACT = {
+  start(){
+    const name = document.getElementById('pname').value.trim();
+    state.player = {name, cls:document.getElementById('pcls').value.trim(), no:document.getElementById('pno').value.trim()};
+    if (!name){ state.startErr = 'กรอกชื่อ–นามสกุลก่อนเข้าห้องทดลอง เพื่อให้ครูบันทึกคะแนนได้'; render(); document.getElementById('pname').focus(); return; }
+    Object.assign(state, {startErr:'', room:0, step:0, rec:{}, tubes:3, refills:0, hintsTotal:0, wrongTotal:0, t0:Date.now(), t1:null, door:'', doorMsg:'', saved:false, copyText:''});
+    go('room');
+  },
+  pick(b){ const x = rec(); if (x.done) return; x.sel = b.dataset.k ?? Number(b.dataset.i); render(); },
+  toggle(b){ const x = rec(), i = Number(b.dataset.i); x.multi = x.multi.includes(i) ? x.multi.filter(v => v !== i) : [...x.multi, i]; render(); },
+  place(b){ const x = rec(); x.place[Number(b.dataset.i)] = Number(b.dataset.b); render(); },
+  orderTap(b){ const x = rec(); x.order.push(Number(b.dataset.i)); if (x.fb && x.fb.kind === 'bad') x.fb = null; render(); },
+  orderUndo(){ rec().order.pop(); render(); },
+  orderReset(){ rec().order = []; render(); },
+  hint(){ const S = step(), x = rec(); if (x.done || x.hints >= 2) return; x.hints++; state.hintsTotal++; render(); },
+  check,
+  run(b){
+    if (state.running) return; state.running = true; b.disabled = true;
+    const svg = app.querySelector('svg.scene');
+    playScene(svg, () => { state.running = false; rec().done = true; render(); });
+  },
+  replay(){ const svg = app.querySelector('svg.scene'); if (svg && !state.running){ state.running = true; playScene(svg, () => { state.running = false; }); } },
+  matchPick(b){
+    const x = rec(), lp = lastPredict(), i = Number(b.dataset.i), truth = lp && lp.x.predOk ? 0 : 1;
+    x.sel = i; x.done = true; x.matchOk = i === truth;
+    const said = lp.S.opts[lp.x.sel].t, res = lp.S.result;
+    x.fb = x.matchOk
+      ? {kind:'ok', title: truth === 0 ? 'ใช่ ผลตรงกับที่คาดการณ์' : 'ใช่ ผลแตกต่างจากที่คาดการณ์', reason: truth === 0 ? `การคาดการณ์ของคุณได้ ${fmt(lp.x.score)} จาก ${lp.S.pts} คะแนน เพราะใช้ข้อมูลในสมุดบันทึกได้ถูกต้อง` : 'การยอมรับว่าผลไม่ตรงกับที่คาด เป็นสิ่งที่นักวิทยาศาสตร์ต้องทำ ข้อมูลจริงสำคัญกว่าความคาดหวัง', evidence:`คาดไว้: ${said} · ผลจริง: ${res}`}
+      : {kind:'note', title:'ลองเทียบอีกครั้ง', reason: truth === 0 ? 'สิ่งที่คุณคาดไว้ตรงกับผลจริง' : 'สิ่งที่คุณคาดไว้ไม่ตรงกับผลจริง นักวิทยาศาสตร์ต้องเทียบสิ่งที่คาดกับข้อมูลจริงอย่างตรงไปตรงมา', evidence:`คาดไว้: ${said} · ผลจริง: ${res}`};
+    render();
+  },
+  next(){
+    const R = room();
+    if (state.step < R.steps.length - 1){ state.step++; render(); app.querySelector('.step-meta')?.scrollIntoView({block:'start', behavior: reduce ? 'auto' : 'smooth'}); }
+    else go('roomDone');
+  },
+  roomNext(){ if (state.room < ROOMS.length - 1){ state.room++; state.step = 0; go('room'); } else { state.door = ''; state.doorMsg = ''; go('door'); } },
+  key(b){ if (state.door.length < 6){ state.door += b.dataset.n; state.doorMsg = ''; render(); } },
+  del(){ state.door = state.door.slice(0,-1); render(); },
+  enter(){
+    if (state.door.length < 6){ state.doorMsg = 'ใส่รหัสให้ครบ 6 หลัก'; render(); return; }
+    if (state.door !== CODE){ state.doorMsg = 'รหัสไม่ถูกต้อง ลองเรียงชิ้นส่วนตามลำดับห้อง 1 ถึง 6'; state.door = ''; render(); return; }
+    state.t1 = Date.now();
+    const list = loadHistory(); list.push(resultRecord()); state.saved = saveHistory(list);
+    go('result');
+  },
+  copyResult(){ const r = resultRecord(); copyOut(CSV_HEAD + '\n' + csvRow(r)); },
+  copyHistory(){ const list = loadHistory(); copyOut(CSV_HEAD + '\n' + list.map(csvRow).join('\n')); },
+  clearAsk(){ state.confirmClear = true; render(); },
+  clearNo(){ state.confirmClear = false; render(); },
+  clearYes(){ saveHistory([]); state.confirmClear = false; state.copyText = ''; toast('ลบผลการเล่นทั้งหมดในเครื่องนี้แล้ว'); render(); },
+  teacher(){ state.copyText = ''; go('teacher'); },
+  home(){ state.copyText = ''; go(state.t1 && state.player.name ? 'result' : 'start'); },
+  again(){ const p = state.player; state = fresh(); state.player = p; go('start'); },
+  calc(){
+    const pre = document.getElementById('pre').value, post = document.getElementById('post').value, full = document.getElementById('full').value;
+    const a = parseNums(pre), b = parseNums(post);
+    const c = {pre, post, full, example: pre.trim() === EX_PRE && post.trim() === EX_POST};
+    if (a.some(isNaN) || b.some(isNaN)) c.error = 'มีค่าที่ไม่ใช่ตัวเลข ตรวจสอบข้อมูลอีกครั้ง';
+    else if (a.length !== b.length) c.error = `จำนวนคะแนนไม่เท่ากัน: ก่อนเรียน ${a.length} ค่า หลังเรียน ${b.length} ค่า`;
+    else if (a.length < 3) c.error = 'ต้องมีคะแนนอย่างน้อย 3 คน';
+    else c.result = pairedT(a,b);
+    state.calc = c; render();
+  },
+  copySentence(){ const t = document.getElementById('sentence'); copyOut(t.value, t); },
+};
+function copyOut(text, el){
+  const done = () => toast('คัดลอกแล้ว วางในไฟล์หรือข้อความได้เลย');
+  const fallback = () => { if (!el){ state.copyText = text; render(); el = document.getElementById('copybox'); } el.focus(); el.select(); toast('กดค้างหรือกด Ctrl+C เพื่อคัดลอกข้อความที่เลือกไว้'); };
+  try { navigator.clipboard.writeText(text).then(done, fallback); } catch(e){ fallback(); }
+}
+app.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]'); if (!b || b.disabled) return;
+  const f = ACT[b.dataset.act]; if (f) f(b);
+});
+app.addEventListener('change', e => {
+  const s = e.target.closest('[data-cell]'); if (!s) return;
+  const x = rec(); x.cells[Number(s.dataset.cell)] = s.value === '' ? undefined : Number(s.value);
+  if (s.value === '') delete x.cells[Number(s.dataset.cell)];
+  render();
+});
+app.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.matches('#pname,#pcls,#pno')) ACT.start();
+});
+
+/* ---------- boot (keeps progress across live updates) ---------- */
+function boot(data){ if (data && data.state && data.state.screen){ state = Object.assign(fresh(), data.state, {running:false, toast:''}); } render(); }
+try { window.claude?.hot?.snapshot?.(() => ({state})); } catch(e){}
+if (window.claude?.hot?.ready) window.claude.hot.ready(boot); else boot(window.claude?.hot?.data ?? {});
+window.__sciLab = {pairedT, ibeta, ROOMS, SKILLS, getState: () => state, ACT, check, render, rec};
+})();
+</script>
+
+</body></html>
